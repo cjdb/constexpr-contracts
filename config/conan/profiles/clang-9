@@ -1,0 +1,20 @@
+[settings]
+os=Linux
+os_build=Linux
+arch=x86_64
+arch_build=x86_64
+compiler=clang
+compiler.version=8
+compiler.libcxx=libc++
+build_type=Debug
+[options]
+enable_clang_tidy=On
+clang_tidy_path=/usr/bin/clang-tidy-9
+[build_requires]
+[env]
+CC=/usr/bin/clang-9
+CXX=/usr/bin/clang++-9
+CXXFLAGS=-std=c++2a -stdlib=libc++ -Wall -Wextra -pedantic -Werror
+LDFLAGS=-fuse-ld=lld -stdlib=libc++ -lc++abi
+CONAN_CMAKE_GENERATOR=Ninja
+CONAN_COMPILER_VERSION=9

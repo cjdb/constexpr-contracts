@@ -1,0 +1,42 @@
+#
+#  Copyright Christopher Di Bella
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+Checks: 'bugprone-*,clang-analyzer-*,-clang-diagnostic-missing-prototypes,-clang-diagnostic-unused-command-line-argument,-cert-dcl21-cpp,-cert-dcl59-cpp,cppcoreguildelines-*,google-*,-google-build-namespaces,-google-build-using-namespace,-google-runtime-int,-google-runtime-references,misc-*,modernize-*,-modernize-use-trailing-return-type,performance-*,portability-*,readability-*,-readability-function-size,-readability-named-parameter,-readability-uppercase-literal-suffix'
+WarningsAsErrors: '*'
+HeaderFilterRegex: 'cjdb/.*'
+
+CheckOptions:
+  - key: bugprone-assert-side-effect
+    value: CJDB_QUIET_ASSERT,CJDB_ALERT_ASSERT,CJDB_QUIET_EXPECTS,CJDB_ALERT_EXPECTS,CJDB_QUIET_ENSURES,CJDB_ALERT_ENSURES
+  - key: bugprone-dangling-handle.HandleClasses
+    value: '::std::basic_string_view;::std::ranges::subrange;::std::ranges::all_view;::std::ranges::common_view;::std::ranges::keys_view;::std::ranges::values_view'
+  - key: bugprone-exception-escape.FunctionsThatShouldNotThrow
+    value: 'iter_move,iter_swap'
+  - key: bugprone-sizeof-expression.WarnOnSizeOfIntegerExpression
+    value: 1
+  - key: bugprone-suspicious-string-compare.StringCompareLikeFunctions
+    value: '__builtin_memcmp,__builtin_strcasecmp,__builtin_strcmp,__builtin_strncasecmp,__builtin_strncmp,_mbscmp,_mbscmp_l,_mbsicmp,_mbsicmp_l,_mbsnbcmp,_mbsnbcmp_l,_mbsnbicmp,_mbsnbicmp_l,_mbsncmp,_mbsncmp_l,_mbsnicmp,_mbsnicmp_l,_memicmp,_memicmp_l,_stricmp,_stricmp_l,_strnicmp,_strnicmp_l,_wcsicmp,_wcsicmp_l,_wcsnicmp,_wcsnicmp_l,lstrcmp,lstrcmpi,memcmp,memicmp,strcasecmp,strcmp,strcmpi,stricmp,strncasecmp,strncmp,strnicmp,wcscasecmp,wcscmp,wcsicmp,wcsncmp,wcsnicmp,wmemcmp'
+  - key: performance-faster-string-find.StringLikeClasses
+    value: '::std::basic_string,::std::basic_string_view'
+  - key: readability-implicit-bool-conversion.AllowPointerConditions
+    value: '1'
+  - key: readability-redundant-declaration.IgnoreMacros
+    value: '0'
+  - key: readability-simplify-boolean-expr.ChainedConditionalReturn,
+    value: '1'
+  - key: readability-simplify-boolean-expr.ChainedConditionalAssignment,
+    value: '1'
+  - key: readability-simplify-subscript-expr.Types
+    value: '::std::basic_string;::std::basic_string_view;::std::vector;::std::array,::gsl::span'
