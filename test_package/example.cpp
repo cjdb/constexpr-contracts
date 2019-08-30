@@ -16,31 +16,20 @@
 #include <iostream>
 #include "cjdb/contracts.hpp"
 
-constexpr int quiet_contract(int x) noexcept
+constexpr int check_constexpr_contract(int x) noexcept
 {
-	CJDB_QUIET_EXPECTS(x == 0);
+	CJDB_EXPECTS(x == 0);
 
 	++x;
-	CJDB_QUIET_ASSERT(x == 1);
+	CJDB_ASSERT(x == 1);
 
 	--x;
-	return CJDB_QUIET_ENSURES(x, x == 0);
-}
-
-constexpr int alert_contract(int x) noexcept
-{
-	CJDB_ALERT_EXPECTS(x == 0);
-
-	++x;
-	CJDB_ALERT_ASSERT(x == 1);
-
-	--x;
-	return CJDB_ALERT_ENSURES(x, x == 0);
+	return CJDB_ENSURES(x, x == 0);
 }
 
 int main() {
-	[[maybe_unused]] constexpr auto x = quiet_contract(0) + alert_contract(0);
+	[[maybe_unused]] constexpr auto x = check_constexpr_contract(0);
 
 	auto y = 0;
-	return quiet_contract(y) + alert_contract(y);
+	return check_constexpr_contract(y);
 }

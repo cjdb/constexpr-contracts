@@ -19,7 +19,7 @@ HeaderFilterRegex: 'cjdb/.*'
 
 CheckOptions:
   - key: bugprone-assert-side-effect
-    value: CJDB_QUIET_ASSERT,CJDB_ALERT_ASSERT,CJDB_QUIET_EXPECTS,CJDB_ALERT_EXPECTS,CJDB_QUIET_ENSURES,CJDB_ALERT_ENSURES
+    value: CJDB_ASSERT,CJDB_EXPECTS,CJDB_ENSURES
   - key: bugprone-dangling-handle.HandleClasses
     value: '::std::basic_string_view;::std::ranges::subrange;::std::ranges::all_view;::std::ranges::common_view;::std::ranges::keys_view;::std::ranges::values_view'
   - key: bugprone-exception-escape.FunctionsThatShouldNotThrow

@@ -13,21 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-function(build_contract filename volume)
-	set(target "${volume}-${filename}")
+function(build_contract filename)
+	set(target "${filename}")
 	add_executable("${target}" "${filename}.cpp")
 	target_include_directories("${target}" PRIVATE "${CMAKE_SOURCE_DIR}/include")
-	target_compile_definitions("${target}"
-	                           PRIVATE CJDB_EXPECTS=CJDB_${volume}_EXPECTS
-	                           PRIVATE CJDB_ASSERT=CJDB_${volume}_ASSERT
-	                           PRIVATE CJDB_ENSURES=CJDB_${volume}_ENSURES)
 endfunction()
 
-build_contract(pass QUIET)
-add_test(test.quiet-pass QUIET-pass)
-
-build_contract(pass ALERT)
-add_test(test.alert-pass ALERT-pass)
+build_contract(pass)
+add_test(test.pass pass)
 
 function(test_contract target expected_output)
 	add_test(NAME "test.${target}"
@@ -40,39 +33,21 @@ endfunction()
 
 function(test_quiet_contract target expected_output)
 	if(CMAKE_BUILD_TYPE MATCHES "Release")
-		test_contract("QUIET-${target}" "")
+		test_contract("${target}" "")
 	else()
-		test_contract("QUIET-${target}" "${expected_output}")
+		test_contract("${target}" "${expected_output}")
 	endif()
 endfunction()
 
-set(precondition_failure
-    "pre-condition \`0 == 1\` failed in \`int main()\` at ../test/fail-expects.cpp:20")
 
-build_contract(fail-expects QUIET)
-test_quiet_contract(fail-expects "${precondition_failure}")
+build_contract(fail-expects)
+test_quiet_contract("fail-expects"
+   "../test/fail-expects.cpp:20: pre-condition \`0 == 1\` failed in \`int main()\`")
 
-build_contract(fail-expects ALERT)
-test_contract(ALERT-fail-expects "${precondition_failure}")
+build_contract(fail-assert)
+test_quiet_contract("fail-assert"
+   "../test/fail-assert.cpp:20: assertion \`not \"runtime failure\"\` failed in \`int main()\`")
 
-###
-
-set(assertion_failure
-    "assertion \`not\ \"runtime failure\"` failed in \`int main()\` at ../test/fail-assert.cpp:20")
-
-build_contract(fail-assert QUIET)
-test_quiet_contract(fail-assert "${assertion_failure}")
-
-build_contract(fail-assert ALERT)
-test_contract(ALERT-fail-assert "${assertion_failure}")
-
-###
-
-set(postcondition_failure
-    "post-condition \`x != 0\` failed in \`int main()\` at ../test/fail-ensures.cpp:21")
-
-build_contract(fail-ensures QUIET)
-test_quiet_contract(fail-ensures "${postcondition_failure}")
-
-build_contract(fail-ensures ALERT)
-test_contract(ALERT-fail-ensures "${postcondition_failure}")
+build_contract(fail-ensures)
+test_quiet_contract("fail-ensures"
+   "../test/fail-ensures.cpp:21: post-condition \`x != 0\` failed in \`int main()\`")

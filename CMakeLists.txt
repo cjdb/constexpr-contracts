@@ -28,7 +28,7 @@ set(CLANG_TIDY_PATH "/usr/bin/clang-tidy" CACHE
    STRING "Sets the path for clang-tidy. Defaults to \"/usr/bin/clang-tidy\".")
 
 if(${ENABLE_CLANG_TIDY})
-	set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_PATH}" -p=${CMAKE_BINARY_DIR})
+	set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_PATH}" "-p=${CMAKE_BINARY_DIR}")
 endif()
 
 enable_testing()

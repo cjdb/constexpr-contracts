@@ -26,5 +26,5 @@ int main()
 	CJDB_CONSTEXPR_CHECK(cjdb_test::evaluate_contract('a'));
 
 	auto v = std::vector<int>{};
-	CJDB_ALERT_ASSERT(cjdb_test::evaluate_contract(v));
+	LIGHT_CHECK(cjdb_test::evaluate_contract(v));
 }
