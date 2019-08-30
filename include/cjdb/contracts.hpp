@@ -17,7 +17,6 @@
 #define CJDB_CONTRACTS_HPP
 
 #include <cstdio>
-#include <cstdlib>
 #include <string_view>
 #include <type_traits>
 
@@ -27,58 +26,49 @@
 // #  error "Contracts Consolation requires a compiler supporting std::is_constant_evaluated."
 // #endif // __cpp_lib_is_constant_evaluated
 
-#define CJDB_QUIET_CONTRACT 0
-#define CJDB_ALERTING_CONTRACT 1
+#define CJDB_EXPECTS(...) CJDB_CONTRACT_IMPL("pre-condition", __VA_ARGS__)
+#define CJDB_ASSERT(...)  CJDB_CONTRACT_IMPL("assertion", __VA_ARGS__)
+#define CJDB_ENSURES(...) CJDB_CONTRACT_IMPL("post-condition", __VA_ARGS__)
 
-#define CJDB_QUIET_EXPECTS(...) CJDB_EXPECTS_IMPL(CJDB_QUIET_CONTRACT, __VA_ARGS__)
-#define CJDB_ALERT_EXPECTS(...) CJDB_EXPECTS_IMPL(CJDB_ALERTING_CONTRACT, __VA_ARGS__)
-
-#define CJDB_QUIET_ASSERT(...) CJDB_ASSERT_IMPL(CJDB_QUIET_CONTRACT, __VA_ARGS__)
-#define CJDB_ALERT_ASSERT(...) CJDB_ASSERT_IMPL(CJDB_ALERTING_CONTRACT, __VA_ARGS__)
-
-#define CJDB_QUIET_ENSURES(...) CJDB_ENSURES_IMPL(CJDB_QUIET_CONTRACT, __VA_ARGS__)
-#define CJDB_ALERT_ENSURES(...) CJDB_ENSURES_IMPL(CJDB_ALERTING_CONTRACT, __VA_ARGS__)
-
-#define CJDB_EXPECTS_IMPL(CJDB_CONTRACT_MODE, ...) \
-	CJDB_CONTRACT_IMPL("pre-condition", CJDB_CONTRACT_MODE, __VA_ARGS__)
-
-#define CJDB_ASSERT_IMPL(CJDB_CONTRACT_MODE, ...) \
-	CJDB_CONTRACT_IMPL("assertion", CJDB_CONTRACT_MODE, __VA_ARGS__)
-
-#define CJDB_ENSURES_IMPL(CJDB_CONTRACT_MODE, ...) \
-	CJDB_CONTRACT_IMPL("post-condition", CJDB_CONTRACT_MODE, __VA_ARGS__)
-
-#ifdef NDEBUG
-	#define CJDB_IS_DEBUG false
+#ifdef _MSC_VER
+	#define CJDB_PRETTY_FUNCTION __FUNCSIG__
 #else
-	#define CJDB_IS_DEBUG true
-#endif // NDEBUG
+	#define CJDB_PRETTY_FUNCTION __PRETTY_FUNCTION__
+#endif // _MSC_VER
 
-#define CJDB_CONTRACT_IMPL(CJDB_KIND, CJDB_CONTRACT_MODE, ...) (void)([](bool const result) constexpr {                                      \
-	auto fail = [](bool const result) consteval noexcept {                                                                                    \
-		if (result) {                                                                                                                          \
-			return true;                                                                                                                        \
-		}                                                                                                                                      \
-		std::abort();                                                                                                                          \
-	};                                                                                                                                        \
-	if (__builtin_expect(not result, false)) {                                                                                                \
-		if (std::is_constant_evaluated()) {                                                                                                    \
-			fail(false);                                                                                                                        \
-		}                                                                                                                                      \
-		return false;                                                                                                                          \
-	}                                                                                                                                         \
-    return true;                                                                                                                             \
-}(static_cast<bool>(__VA_ARGS__)) ? (void)0 : [](std::string_view const function) {                                                          \
-	if (CJDB_IS_DEBUG or CJDB_CONTRACT_MODE == CJDB_ALERTING_CONTRACT) {                                                                      \
-		std::fprintf(stderr, CJDB_KIND " `" #__VA_ARGS__ "` failed in `%s` at " __FILE__ ":" CJDB_TO_STRING(__LINE__) "\n", function.data());  \
-	}                                                                                                                                         \
-	std::abort();                                                                                                                             \
-}(__PRETTY_FUNCTION__))
+namespace cjdb::contracts_detail {
+	#ifdef NDEBUG
+		inline constexpr auto is_debug = false;
+	#else
+		inline constexpr auto is_debug = true;
+	#endif // NDEBUG
+
+	constexpr void contract_impl(bool const result,
+	                             std::string_view const message,
+	                             std::string_view const function) noexcept
+	{
+		if (not result) {
+			if (not std::is_constant_evaluated() and is_debug) {
+				std::fprintf(stderr, message.data(), function.data());
+			}
+		#ifdef _MSC_VER
+			__assume(false);
+		#elif defined(__OPTIMIZE__)
+			__builtin_unreachable();
+		#else
+			__builtin_trap();
+		#endif // __OPTIMIZE__
+		}
+	}
+} // namespace cjdb::contracts_detail
+
+#define CJDB_CONTRACT_IMPL(CJDB_KIND, ...) \
+   ::cjdb::contracts_detail::contract_impl(static_cast<bool>(__VA_ARGS__),    \
+      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed in `%s`\n", \
+      CJDB_PRETTY_FUNCTION)
 
 
 #define CJDB_TO_STRING(CJDB_STRING) CJDB_TO_STRING_IMPL(CJDB_STRING)
 #define CJDB_TO_STRING_IMPL(CJDB_STRING) #CJDB_STRING
-
-#define CJDB_AXIOM(_) true
 
 #endif // CJDB_CONTRACTS_HPP

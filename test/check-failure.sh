@@ -15,18 +15,20 @@
 # limitations under the License.
 #
 
-./test/${1} > "`pwd`/.${1}.out" 2>&1
-if [[ ${?} -eq 0 ]]; then
-	exit 1
-fi
-
 if [[ -z "${2}" ]]; then
-	touch "`pwd`/.${1}.expected"
+	is_debug=0
 else
+	is_debug=1
 	echo "${2}" > "`pwd`/.${1}.expected"
 fi
 
-diff "`pwd`/.${1}.out" "`pwd`/.${1}.expected"
+./test/${1} > "`pwd`/.${1}.out" 2>&1
+if [[ ${?} -eq 0 && is_debug -eq 1 ]]; then
+	echo "./test/${1} unexpectedly passes"
+	exit 1
+fi
+
+diff -N "`pwd`/.${1}.out" "`pwd`/.${1}.expected"
 result=${?}
 rm "`pwd`/.${1}.out" "`pwd`/.${1}.expected"
 exit ${result}
