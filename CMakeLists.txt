@@ -17,6 +17,12 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/config/cmake")
 
 # Project configuration
+# Build
+
+target_include_directories(contracts_consolation INTERFACE
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+   $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
+
 enable_testing()
 include(CTest)
 
@@ -32,3 +38,12 @@ include(packages)
 include_directories(include)
 add_subdirectory(source)
 add_subdirectory(test)
+
+# Install
+
+include(CMakePackageConfigHelpers)
+install(TARGETS contracts_consolation EXPORT contracts_consolation-targets DESTINATION lib)
+install(EXPORT contracts_consolation-targets FILE contracts_consolation-config.cmake
+   DESTINATION lib/cmake/contracts_consolation)
+install(DIRECTORY include/ DESTINATION include FILES_MATCHING PATTERN "*")
+export(EXPORT contracts_consolation-targets FILE contracts_consolation-config.cmake)
