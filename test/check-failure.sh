@@ -30,5 +30,6 @@ fi
 
 diff -N "`pwd`/.${1}.out" "`pwd`/.${1}.expected"
 result=${?}
+
 rm "`pwd`/.${1}.out" "`pwd`/.${1}.expected"
 exit ${result}

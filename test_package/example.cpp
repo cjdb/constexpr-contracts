@@ -24,7 +24,7 @@ constexpr int check_constexpr_contract(int x) noexcept
 	CJDB_ASSERT(x == 1);
 
 	--x;
-	return CJDB_ENSURES(x, x == 0);
+	return CJDB_ENSURES(x == 0), x;
 }
 
 int main() {

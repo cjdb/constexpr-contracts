@@ -6,15 +6,16 @@ arch_build=x86_64
 compiler=gcc
 compiler.version=9
 compiler.libcxx=libstdc++11
+compiler.cppstd=20
 build_type=Debug
 [options]
-enable_clang_tidy=On
-clang_tidy_path=/usr/bin/clang-tidy-9
+cjdb.contracts:enable_clang_tidy=On
+cjdb.contracts:clang_tidy_path=/usr/bin/clang-tidy-9
 [build_requires]
 [env]
 CC=/usr/bin/gcc-9
 CXX=/usr/bin/g++-9
-CXXFLAGS=-std=c++2a -Wall -Wextra -pedantic -Werror -D_GLIBCXX_HAVE_BUILTIN_IS_CONSTANT_EVALUATED
+CXXFLAGS=-Wall -Wextra -pedantic -Werror -D_GLIBCXX_HAVE_BUILTIN_IS_CONSTANT_EVALUATED
 LDFLAGS=-fuse-ld=gold
 CONAN_CMAKE_GENERATOR=Ninja
 CONAN_COMPILER_VERSION=9

@@ -18,29 +18,25 @@ import os
 
 
 class ContractsConsolationConan(ConanFile):
-    name = "cjdb.contracts"
-    version = "1.0"
-    license = "Apache 2.0"
+    name = "contracts-consolation"
+    version = "0.1"
+    license = "Apache Licence, Version 2.0"
     author = "Christopher Di Bella <cjdb.ns@gmail.com>"
     url = "https://github.com/cjdb/contracts-consolation"
-    description = "Contracts Consolation is a C++20 library supporting compile-time friendly contracts."
+    description = "A C++20 library supporting compile-time friendly contracts."
     topics = ("c++20", "contracts")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "enable_clang_tidy": ["Off", "On"],
         "clang_tidy_path": "ANY"
     }
+    default_options = {
+        "enable_clang_tidy": "Off",
+        "clang_tidy_path": "/usr/bin/clang-tidy"
+    }
     generators = "cmake_paths", "cmake"
-
-    def source(self):
-        self.run("git clone https://github.com/cjdb/contracts-consolation.git")
-        # This small hack might be useful to guarantee proper /MT /MD linkage
-        # in MSVC if the packaged project doesn't have variables to set it
-        # properly
-        tools.replace_in_file("contracts-consolation/CMakeLists.txt", "PROJECT(contracts-consolation)",
-                              '''PROJECT(contracts-consolation)
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()''')
+    export_sources = "include/*", "LICENSE",
+    no_copy_source = True
 
     def build(self):
         cmake = CMake(self)
@@ -55,7 +51,8 @@ conan_basic_setup()''')
             cmake.test(output_on_failure=True)
 
     def package(self):
-        self.copy("*.hpp", dst="include", src="include")
+        self.copy("include/*")
+        self.copy("LICENSE", dst="licenses", ignore_case=True, keep_path=False)
 
-    def package_info(self):
-        self.cpp_info.libs = ["cjdb.contracts"]
+    def package_id(self):
+        self.info.header_only()
