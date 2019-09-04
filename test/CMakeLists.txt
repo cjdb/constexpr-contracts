@@ -42,12 +42,12 @@ endfunction()
 
 build_contract(fail-expects)
 test_quiet_contract("fail-expects"
-   "../test/fail-expects.cpp:20: pre-condition \`0 == 1\` failed in \`int main()\`")
+   "${CMAKE_SOURCE_DIR}/test/fail-expects.cpp:20: pre-condition \`0 == 1\` failed in \`int main()\`")
 
 build_contract(fail-assert)
 test_quiet_contract("fail-assert"
-   "../test/fail-assert.cpp:20: assertion \`not \"runtime failure\"\` failed in \`int main()\`")
+   "${CMAKE_SOURCE_DIR}/test/fail-assert.cpp:20: assertion \`not \"runtime failure\"\` failed in \`int main()\`")
 
 build_contract(fail-ensures)
 test_quiet_contract("fail-ensures"
-   "../test/fail-ensures.cpp:21: post-condition \`x != 0\` failed in \`int main()\`")
+   "${CMAKE_SOURCE_DIR}/test/fail-ensures.cpp:21: post-condition \`x != 0\` failed in \`int main()\`")

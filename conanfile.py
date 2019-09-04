@@ -34,24 +34,23 @@ class ContractsConsolationConan(ConanFile):
         "enable_clang_tidy": "Off",
         "clang_tidy_path": "/usr/bin/clang-tidy"
     }
-    generators = "cmake_paths", "cmake"
-    export_sources = "include/*", "LICENSE",
+    exports_sources = "include/*", "LICENSE", "CMakeLists.txt", "test/*"
     no_copy_source = True
 
     def build(self):
         cmake = CMake(self)
         cmake.definitions["ENABLE_CLANG_TIDY"] = self.options.enable_clang_tidy
         cmake.definitions["CLANG_TIDY_PATH"] = self.options.clang_tidy_path
-        cmake.configure(source_folder="")
-
+        cmake.configure()
         cmake.build()
 
         env_build = RunEnvironment(self)
         with tools.environment_append(env_build.vars):
             cmake.test(output_on_failure=True)
+        cmake.install()
 
     def package(self):
-        self.copy("include/*")
+        self.copy("include/")
         self.copy("LICENSE", dst="licenses", ignore_case=True, keep_path=False)
 
     def package_id(self):
