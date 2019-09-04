@@ -48,8 +48,10 @@ namespace cjdb::contracts_detail {
 	                             std::string_view const function) noexcept
 	{
 		if (not result) {
-			if (not std::is_constant_evaluated() and is_debug) {
-				std::fprintf(stderr, message.data(), function.data());
+			if (not std::is_constant_evaluated()) {
+				if constexpr (is_debug) {
+					std::fprintf(stderr, "%s in `%s`\n", message.data(), function.data());
+				}
 			}
 		#ifdef _MSC_VER
 			__assume(false);
@@ -64,7 +66,7 @@ namespace cjdb::contracts_detail {
 
 #define CJDB_CONTRACT_IMPL(CJDB_KIND, ...) \
    ::cjdb::contracts_detail::contract_impl(static_cast<bool>(__VA_ARGS__),    \
-      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed in `%s`\n", \
+      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed", \
       CJDB_PRETTY_FUNCTION)
 
 
