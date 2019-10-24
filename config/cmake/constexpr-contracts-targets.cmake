@@ -4,4 +4,4 @@ include(CMakeFindDependencyMacro)
 find_dependency(MYDEP REQUIRED)
 
 # Add the targets file
-include("${CMAKE_CURRENT_LIST_DIR}/contracts_consolation-targets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/constexpr-contracts-targets.cmake")
