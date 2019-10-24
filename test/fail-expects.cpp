@@ -13,9 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-#include "cjdb/contracts.hpp"
+#include <cjdb/contracts.hpp>
+#include <cstdio>
+#include <cstdlib>
 
-int main()
+int main(int argc, char**)
 {
-	CJDB_EXPECTS(0 == 1);
+	CJDB_EXPECTS(argc != 1);
+	if (argc == 1) {
+		std::fprintf(stderr, "This should never be printed.\n");
+		std::exit(1);
+	}
+
+	constexpr auto return_code = 255;
+	return return_code;
 }

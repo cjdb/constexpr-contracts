@@ -15,7 +15,9 @@
 //
 #include "cjdb/contracts.hpp"
 
-int main()
+int main(int argc, char**)
 {
-	CJDB_ASSERT(not "runtime failure");
+	CJDB_ASSERT(argc > 1);
+	constexpr auto return_code = 255;
+	return argc == 1 ? 0 : return_code;
 }
