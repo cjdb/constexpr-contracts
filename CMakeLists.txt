@@ -19,7 +19,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/config/cmake")
 # Project configuration
 # Build
 
-target_include_directories(contracts_consolation INTERFACE
+target_include_directories(constexpr-contracts INTERFACE
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
    $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
 
@@ -42,8 +42,11 @@ add_subdirectory(test)
 # Install
 
 include(CMakePackageConfigHelpers)
-install(TARGETS contracts_consolation EXPORT contracts_consolation-targets DESTINATION lib)
-install(EXPORT contracts_consolation-targets FILE contracts_consolation-config.cmake
-   DESTINATION lib/cmake/contracts_consolation)
+install(TARGETS constexpr-contracts
+        EXPORT  constexpr-contracts
+        DESTINATION lib)
+install(EXPORT constexpr-contracts
+        FILE constexpr-contracts-config.cmake
+        NAMESPACE cjdb::
+        DESTINATION lib/cmake/constexpr-contracts)
 install(DIRECTORY include/ DESTINATION include FILES_MATCHING PATTERN "*")
-export(EXPORT contracts_consolation-targets FILE contracts_consolation-config.cmake)
