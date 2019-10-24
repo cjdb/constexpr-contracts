@@ -15,7 +15,7 @@ cjdb.contracts:clang_tidy_path=/usr/bin/clang-tidy-9
 [env]
 CC=/usr/bin/clang-9
 CXX=/usr/bin/clang++-9
-CXXFLAGS=-stdlib=libc++ -Wall -Wextra -pedantic -Werror
+CXXFLAGS=-stdlib=libc++ -fdiagnostics-color=always -Werror -Wall -Wextra -Wcast-align -Wconversion -Wdouble-promotion -Wnon-virtual-dtor -Wold-style-cast -Woverloaded-virtual -Wpedantic -Wshadow -Wsign-conversion -Wsign-promo -Wunused -Wformat=2 -Wodr -Wno-attributes -Wnull-dereference
 LDFLAGS=-fuse-ld=lld -stdlib=libc++ -lc++abi
 CONAN_CMAKE_GENERATOR=Ninja
 CONAN_COMPILER_VERSION=9
