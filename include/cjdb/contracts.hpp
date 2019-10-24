@@ -43,30 +43,45 @@ namespace cjdb::contracts_detail {
 		inline constexpr auto is_debug = true;
 	#endif // NDEBUG
 
-	constexpr void contract_impl(bool const result,
-	                             std::string_view const message,
-	                             std::string_view const function) noexcept
-	{
-		if (not result) {
-			if (not std::is_constant_evaluated()) {
-				if constexpr (is_debug) {
-					std::fprintf(stderr, "%s in `%s`\n", message.data(), function.data());
+	struct contract_impl_fn {
+		constexpr void operator()(bool const result,
+		                          std::string_view const message,
+		                          std::string_view const function) const noexcept
+		{
+			if (not result) {
+				if (not std::is_constant_evaluated()) {
+					if constexpr (is_debug) {
+						std::fprintf(stderr, "%s in `%s`\n", message.data(), function.data());
+					}
 				}
+			#ifdef _MSC_VER
+				__assume(false);
+			#elif defined(__OPTIMIZE__)
+				__builtin_unreachable();
+			#else
+				__builtin_trap();
+			#endif // __OPTIMIZE__
 			}
-		#ifdef _MSC_VER
-			__assume(false);
-		#elif defined(__OPTIMIZE__)
-			__builtin_unreachable();
-		#else
-			__builtin_trap();
-		#endif // __OPTIMIZE__
 		}
-	}
+	};
+	inline constexpr auto contract_impl = contract_impl_fn{};
+
+	// This function doesn't use std::same_as, since the library is used by cjdb-ranges, which is
+	// an implementation of standard concepts.
+	struct matches_bool_fn {
+		template<typename T>
+		requires std::is_same_v<std::remove_cvref_t<T>, bool>
+		constexpr bool operator()(T const t) const noexcept
+		{
+			return t;
+		}
+	};
+	inline constexpr auto matches_bool = matches_bool_fn{};
 } // namespace cjdb::contracts_detail
 
 #define CJDB_CONTRACT_IMPL(CJDB_KIND, ...) \
-   ::cjdb::contracts_detail::contract_impl(static_cast<bool>(__VA_ARGS__),    \
-      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed", \
+   ::cjdb::contracts_detail::contract_impl(::cjdb::contracts_detail::matches_bool(__VA_ARGS__), \
+      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed",        \
       CJDB_PRETTY_FUNCTION)
 
 
