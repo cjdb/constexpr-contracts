@@ -5,14 +5,14 @@ from conans import ConanFile, CMake, RunEnvironment, tools
 import os
 
 
-class ContractsConsolationConan(ConanFile):
-    name = "contracts-consolation"
-    version = "0.1"
+class ContractsConan(ConanFile):
+    name = "constexpr-contracts"
+    version = "head"
     license = "Apache-2.0 WITH LLVM-exception"
     author = "Christopher Di Bella <cjdb.ns@gmail.com>"
-    url = "https://github.com/cjdb/contracts-consolation"
+    url = "https://github.com/cjdb/cjdb-contracts.git"
     description = "A C++20 library supporting compile-time friendly contracts."
-    topics = ("c++20", "contracts")
+    topics = ("cpp", "c++20", "contracts")
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "enable_clang_tidy": ["Off", "On"],
@@ -39,7 +39,7 @@ class ContractsConsolationConan(ConanFile):
 
     def package(self):
         self.copy("include/")
-        self.copy("LICENSE", dst="licenses", ignore_case=True, keep_path=False)
+        self.copy("LICENSE.md", dst="licenses", ignore_case=True, keep_path=False)
 
     def package_id(self):
         self.info.header_only()
