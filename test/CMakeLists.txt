@@ -23,11 +23,14 @@ build_contract(pass)
 add_test(test.pass pass)
 
 function(test_contract target expected_output)
+	set(args "${CMAKE_SOURCE_DIR}/test/check-failure.py"
+	          "--process-name=${target}"
+	          "--expected-output=${expected_output}")
+	if (${CMAKE_BUILD_TYPE} MATCHES ".*Debug.*")
+		list(APPEND args "--debug=True")
+	endif()
 	add_test(NAME "test.${target}"
-	         COMMAND bash
-	         "${CMAKE_SOURCE_DIR}/test/check-failure.sh"
-	         "${target}"
-	         "${expected_output}"
+	         COMMAND python3 ${args}
 	         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 endfunction()
 
@@ -42,12 +45,12 @@ endfunction()
 
 build_contract(fail-expects)
 test_quiet_contract("fail-expects"
-   "${CMAKE_SOURCE_DIR}/test/fail-expects.cpp:20: pre-condition \`0 == 1\` failed in \`int main()\`")
+   "^[.]{2}/[.]{2}/[.]{2}/test/fail-expects[.]cpp:22: pre-condition \`argc != 1\` failed in \`int main(int, char\\s*[*]{2})\`$")
 
 build_contract(fail-assert)
 test_quiet_contract("fail-assert"
-   "${CMAKE_SOURCE_DIR}/test/fail-assert.cpp:20: assertion \`not \"runtime failure\"\` failed in \`int main()\`")
+   "[.]{2}/[.]{2}/[.]{2}/test/fail-assert[.]cpp:20: assertion \`argc > 1\` failed in \`int main(int, char\\s*[*]{2})\`$")
 
 build_contract(fail-ensures)
 test_quiet_contract("fail-ensures"
-   "${CMAKE_SOURCE_DIR}/test/fail-ensures.cpp:21: post-condition \`x != 0\` failed in \`int main()\`")
+   "../../../test/fail-ensures.cpp:22: post-condition \`x > 1\` failed in \`int magic(int)\`\n")
