@@ -9,13 +9,13 @@ compiler.libcxx=libstdc++11
 compiler.cppstd=20
 build_type=Debug
 [options]
-cjdb.contracts:enable_clang_tidy=On
-cjdb.contracts:clang_tidy_path=/usr/bin/clang-tidy-9
+constexpr-contracts:enable_clang_tidy=Off
+constexpr-contracts:clang_tidy_path=/usr/bin/clang-tidy-9
 [build_requires]
 [env]
 CC=/usr/bin/gcc-9
 CXX=/usr/bin/g++-9
-CXXFLAGS=-fdiagnostics-color=always -Werror -Wall -Wextra -Wcast-align -Wconversion -Wdouble-promotion -Wnon-virtual-dtor -Wold-style-cast -Woverloaded-virtual -Wpedantic -Wshadow -Wsign-conversion -Wsign-promo -Wunused -Wformat=2 -Wodr -Wno-attributes -Wnull-dereference
+CXXFLAGS=-fconcepts -fdiagnostics-color=always -Werror -Wall -Wextra -Wcast-align -Wconversion -Wdouble-promotion -Wnon-virtual-dtor -Wold-style-cast -Woverloaded-virtual -Wpedantic -Wshadow -Wsign-conversion -Wsign-promo -Wunused -Wformat=2 -Wodr -Wno-attributes -Wnull-dereference
 LDFLAGS=-fuse-ld=gold
 CONAN_CMAKE_GENERATOR=Ninja
 CONAN_COMPILER_VERSION=9
