@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 cmake_minimum_required(VERSION 3.14)
-project("contracts" CXX)
+project("constexpr-contracts" CXX)
 
-add_library(contracts_consolation INTERFACE)
+add_library(${PROJECT_NAME} INTERFACE)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/config/cmake")
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -25,7 +25,7 @@ endif()
 
 # Build
 
-target_include_directories(contracts_consolation INTERFACE
+target_include_directories(constexpr-contracts INTERFACE
    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
    $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
 
@@ -37,8 +37,11 @@ add_subdirectory(test)
 # Install
 
 include(CMakePackageConfigHelpers)
-install(TARGETS contracts_consolation EXPORT contracts_consolation-targets DESTINATION lib)
-install(EXPORT contracts_consolation-targets FILE contracts_consolation-config.cmake
-   DESTINATION lib/cmake/contracts_consolation)
+install(TARGETS constexpr-contracts
+        EXPORT  constexpr-contracts
+        DESTINATION lib)
+install(EXPORT constexpr-contracts
+        FILE constexpr-contracts-config.cmake
+        NAMESPACE cjdb::
+        DESTINATION lib/cmake/constexpr-contracts)
 install(DIRECTORY include/ DESTINATION include FILES_MATCHING PATTERN "*")
-export(EXPORT contracts_consolation-targets FILE contracts_consolation-config.cmake)
