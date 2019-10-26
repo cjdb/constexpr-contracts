@@ -23,6 +23,11 @@ FIXME
 
 FIXME
 
+#### Linking in CMake
+
+To link in CMake, you'll need to use `find_package(constexpr-contracts REQUIRED)` to import the library.
+To link against the library, use `target_link_libraries(target PRIVATE cjdb::constexpr-contracts)`.
+
 ## Usage
 
 This library provides three macros:
