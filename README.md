@@ -21,8 +21,13 @@ You can clone this repository and place the directory `cjdb` in your own `includ
 
 ### With Conan
 
-1. Add `artifactory` to your list of remotes.
-2. Add `package-name` to your list of required packages.
+1. Add `https://api.bintray.com/conan/cjdb/cjdb` to your list of remotes.
+2. Add `constexpr-contracts` to your list of required packages.
+
+#### Linking in CMake
+
+To link in CMake, you'll need to use `find_package(constexpr-contracts REQUIRED)` to import the library.
+To link against the library, use `target_link_libraries(target PRIVATE cjdb::constexpr-contracts)`.
 
 ## Usage
 
