@@ -4,6 +4,9 @@
 function(build_contract filename)
 	set(target "${filename}")
 	add_executable("${target}" "${filename}.cpp")
+	if(MSVC)
+		target_compile_options("${target}" PRIVATE "/permissive-")
+	endif()
 	target_include_directories("${target}" PRIVATE "${CMAKE_SOURCE_DIR}/include")
 endfunction()
 
