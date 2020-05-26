@@ -58,9 +58,9 @@ namespace cjdb_test {
 }
 
 
-#define CJDB_CONSTEXPR_CHECK(...) {                   \
-	static_assert(std::bool_constant<__VA_ARGS__>{});  \
-	LIGHT_CHECK(__VA_ARGS__);                          \
+#define CJDB_CONSTEXPR_CHECK(...) {                        \
+	static_assert(std::bool_constant<__VA_ARGS__>::value);  \
+	LIGHT_CHECK(__VA_ARGS__);                               \
 }
 
 #endif // CJDB_COCO_TEST_HPP
