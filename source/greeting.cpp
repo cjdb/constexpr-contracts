@@ -8,6 +8,6 @@
 namespace project_template {
 	std::string greet(std::string_view name)
 	{
-		return std::string("Hello, ").append(name, '!');
+		return std::string("Hello, ") += name;
 	}
 } // namespace project_template
