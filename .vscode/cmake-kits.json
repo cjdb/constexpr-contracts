@@ -1,0 +1,68 @@
+[
+	{
+		"name": "Toolchain: gcc_libstdcxx",
+		"toolchainFile": "${workspaceFolder}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+		"preferredGenerator": {
+			"name": "Ninja"
+		},
+		"cmakeSettings": {
+			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/gcc_libstdcxx.cmake",
+			"TODO_RENAME_ME_CLANG_TIDY_PATH": "/usr/bin/clang-tidy"
+		}
+	},
+	{
+		"name": "Toolchain: gcc_libstdcxx (clang-tidy disabled)",
+		"toolchainFile": "${workspaceFolder}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+		"preferredGenerator": {
+			"name": "Ninja"
+		},
+		"cmakeSettings": {
+			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/gcc_libstdcxx.cmake",
+			"TODO_RENAME_ME_ENABLE_CLANG_TIDY_PATH": "Off"
+		}
+	},
+	{
+		"name": "Toolchain: clang_libstdcxx",
+		"toolchainFile": "${workspaceFolder}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+		"preferredGenerator": {
+			"name": "Ninja"
+		},
+		"cmakeSettings": {
+			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/clang_libstdcxx.cmake",
+			"TODO_RENAME_ME_CLANG_TIDY_PATH": "/usr/bin/clang-tidy"
+		}
+	},
+	{
+		"name": "Toolchain: clang_libstdcxx (clang-tidy disabled)",
+		"toolchainFile": "${workspaceFolder}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+		"preferredGenerator": {
+			"name": "Ninja"
+		},
+		"cmakeSettings": {
+			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/clang_libstdcxx.cmake",
+			"TODO_RENAME_ME_ENABLE_CLANG_TIDY": "Off"
+		}
+	},
+	{
+		"name": "Toolchain: clang_libcxx",
+		"toolchainFile": "${workspaceFolder}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+		"preferredGenerator": {
+			"name": "Ninja"
+		},
+		"cmakeSettings": {
+			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/clang_libcxx.cmake",
+			"TODO_RENAME_ME_CLANG_TIDY_PATH": "/usr/bin/clang-tidy"
+		}
+	},
+	{
+		"name": "Toolchain: clang_libcxx (clang-tidy disabled)",
+		"toolchainFile": "${workspaceFolder}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+		"preferredGenerator": {
+			"name": "Ninja"
+		},
+		"cmakeSettings": {
+			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/clang_libcxx.cmake",
+			"TODO_RENAME_ME_ENABLE_CLANG_TIDY": "Off"
+		}
+	}
+]
