@@ -124,3 +124,25 @@ function(cxx_test)
 
 	add_test("test.${add_target_args_TARGET}" "${add_target_args_TARGET}")
 endfunction()
+
+set(PROJECT_TEMPLATE_ALERT_MISSING_BENCHMARK_FRAMEWORK Off)
+function(cxx_benchmark)
+	cxx_binary(${ARGN})
+
+	set(optional_args "")
+	set(single_args BENCHMARK_FRAMEWORK)
+	set(multi_args "")
+	PROJECT_TEMPLATE_EXTRACT_ADD_TARGET_ARGS(
+	   "${optional_args}"
+	   "${single_args}"
+	   "${multi_args}"
+	   ${ARGN}
+	)
+
+	target_link_libraries(
+	   "${add_target_args_TARGET}"
+	   PRIVATE
+	   benchmark::benchmark
+	   benchmark::benchmark_main
+	)
+endfunction()
