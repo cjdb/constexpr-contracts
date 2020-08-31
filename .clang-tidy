@@ -1,0 +1,58 @@
+# Copyright (c) Christopher Di Bella.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+Checks:           'abseil-*,boost-*,bugprone-*,cert-*,clang-analyzer-*,cppcoreguildelines-*,google-*,misc-*,modernize-*,performance-*,portability-*,readability-*,-bugprone-exception-escape,-cert-msc32-c,-cert-msc51-cpp,-clang-diagnostic-missing-prototypes,-clang-diagnostic-unused-command-line-argument,-google-runtime-int,-google-runtime-references,-misc-no-recursion,-misc-non-private-member-variables-in-classes,-modernize-use-trailing-return-type,-readability-function-size,-readability-named-parameter,-readability-qualified-auto'
+WarningsAsErrors: '*'
+
+CheckOptions:
+  - key: bugprone-assert-side-effect
+    value: CJDB_EXPECTS,CJDB_ENSURES,CJDB_ASSERT
+  - key: bugprone-dangling-handle.HandleClasses
+    value: '::std::basic_string_view;::std::ranges::subrange;::std::ranges::all_view;::std::ranges::common_view;::std::ranges::keys_view;::std::ranges::values_view'
+  - key: bugprone-exception-escape.FunctionsThatShouldNotThrow
+    value: 'iter_move,iter_swap'
+  - key: readability-simplify-boolean-expr.ChainedConditionalReturn
+    value: '1'
+  - key: readability-simplify-boolean-expr.ChainedConditionalAssignment
+    value: '1'
+  - key: readability-simplify-subscript-expr.Types
+    value: '::std::basic_string;::std::basic_string_view;::std::vector;::std::array,::std::span'
+
+  - key: readability-identifier-naming.ClassCase
+    value: "lower_case"
+  - key: readability-identifier-naming.ClassMemberSuffix
+    value: "_"
+  - key: readability-identifier-naming.ConstantCase
+    value: "lower_case"
+  - key: readability-identifier-naming.ConstantMemberCase
+    value: "lower_case"
+  - key: readability-identifier-naming.ConstexprVariableCase
+    value: "lower_case"
+  - key: readability-identifier-naming.EnumCase
+    value: "lower_case"
+  - key: readability-identifier-naming.EnumConstantCase
+    value: "lower_case"
+  - key: readability-identifier-naming.FunctionCase
+    value: "lower_case"
+  - key: readability-identifier-naming.GlobalCase
+    value: "lower_case"
+  - key: readability-identifier-naming.MemberCase
+    value: "lower_case"
+  - key: readability-identifier-naming.MethodCase
+    value: "lower_case"
+  - key: readability-identifier-naming.NamespaceCase
+    value: "lower_case"
+  - key: readability-identifier-naming.ParameterCase
+    value: "lower_case"
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: "_"
+  - key: readability-identifier-naming.PrivateMethodCase
+    value: "lower_case"
+  - key: readability-identifier-naming.PublicMemberCase
+    value: "lower_case"
+  - key: readability-identifier-naming.PublicMethodCase
+    value: "lower_case"
+  - key: readability-identifier-naming.TypeAliasCase
+    value: "lower_case"
+  - key: readability-identifier-naming.VariableCase
+    value: "lower_case"
