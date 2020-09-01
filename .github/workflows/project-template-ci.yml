@@ -88,8 +88,15 @@ jobs:
           sudo update-alternatives --install /usr/bin/llvm-rc llvm-rc /usr/bin/llvm-rc-11 100
           sudo update-alternatives --install /usr/bin/llvm-ranlib llvm-ranlib /usr/bin/llvm-ranlib-11 100
 
-      - name: Checkout
+      - name: Checkout head
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Formatting
+        id: git_clang_format
+        run: |
+          git-clang-format-11 --style=file --extensions c,cc,cpp,cxx,h,hh,hpp,hxx --diff origin/main HEAD
 
       - name: Install external libraries
         id: install_vcpkg
