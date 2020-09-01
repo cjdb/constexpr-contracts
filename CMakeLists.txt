@@ -1,7 +1,7 @@
 # Copyright (c) Christopher Di Bella.
 # SPDX-License-Identifier: Apache-2.0
 #
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.17)
 
 project("TODO_RENAME_ME" CXX)
 

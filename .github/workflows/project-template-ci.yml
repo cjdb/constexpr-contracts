@@ -1,0 +1,117 @@
+name: project_template CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: "Linux gcc_libstdcxx Debug"
+            artifact: "Linux.tar.xz"
+            os: ubuntu-20.04
+            clang_tidy_path: /usr/bin/clang-tidy-11
+            build_type: Debug
+            toolchain: gcc_libstdcxx
+
+          - name: "Linux gcc_libstdcxx Release"
+            artifact: "Linux.tar.xz"
+            os: ubuntu-20.04
+            clang_tidy_path: /usr/bin/clang-tidy-11
+            build_type: Release
+            toolchain: gcc_libstdcxx
+
+          - name: "Linux gcc_libstdcxx RelWithDebInfo"
+            artifact: "Linux.tar.xz"
+            os: ubuntu-20.04
+            clang_tidy_path: /usr/bin/clang-tidy-11
+            build_type: RelWithDebInfo
+            toolchain: gcc_libstdcxx
+
+          - name: "Linux gcc_libstdcxx MinSizeRel"
+            artifact: "Linux.tar.xz"
+            os: ubuntu-20.04
+            clang_tidy_path: /usr/bin/clang-tidy-11
+            build_type: MinSizeRel
+            toolchain: gcc_libstdcxx
+
+          - name: "Linux clang_libstdcxx Debug"
+            artifact: "Linux.tar.xz"
+            os: ubuntu-20.04
+            clang_tidy_path: /usr/bin/clang-tidy-11
+            build_type: Debug
+            toolchain: clang_libstdcxx
+
+          - name: "Linux clang_libstdcxx Release"
+            artifact: "Linux.tar.xz"
+            os: ubuntu-20.04
+            clang_tidy_path: /usr/bin/clang-tidy-11
+            build_type: Release
+            toolchain: clang_libstdcxx
+
+          - name: "Linux clang_libstdcxx RelWithDebInfo"
+            artifact: "Linux.tar.xz"
+            os: ubuntu-20.04
+            clang_tidy_path: /usr/bin/clang-tidy-11
+            build_type: RelWithDebInfo
+            toolchain: clang_libstdcxx
+
+          - name: "Linux clang_libstdcxx MinSizeRel"
+            artifact: "Linux.tar.xz"
+            os: ubuntu-20.04
+            clang_tidy_path: /usr/bin/clang-tidy-11
+            build_type: MinSizeRel
+            toolchain: clang_libstdcxx
+    steps:
+      - name: Install tools
+        id: install_tools
+        run: |
+          sudo wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+          sudo apt-add-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-11 main'
+          sudo apt-get update
+          sudo apt-get install -y cmake g++-10 ninja-build libc++-11-dev libc++abi-11-dev libclang-11-dev lld-11 clang-format-11 clang-tidy-11 clang-tools-11 clang-11
+          sudo apt-get remove -y libclang-6.0-dev lld-6.0 clang-format-6.0 clang-tidy-6.0 clang-tools-6.0 clang-6.0
+          sudo apt-get remove -y libclang-7-dev   lld-7   clang-format-7   clang-tidy-7   clang-tools-7   clang-7
+          sudo apt-get remove -y libclang-8-dev   lld-8   clang-format-8   clang-tidy-8   clang-tools-8   clang-8
+          sudo apt-get remove -y libclang-9-dev   lld-9   clang-format-9   clang-tidy-9   clang-tools-9   clang-9
+          sudo apt-get autoremove -y
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-11 100
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-11 100
+          sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-11 100
+          sudo update-alternatives --install /usr/bin/git-clang-format git-clang-format /usr/bin/git-clang-format-11 100
+          sudo update-alternatives --install /usr/bin/llvm-ar llvm-ar /usr/bin/llvm-ar-11 100
+          sudo update-alternatives --install /usr/bin/llvm-as llvm-as /usr/bin/llvm-as-11 100
+          sudo update-alternatives --install /usr/bin/llvm-rc llvm-rc /usr/bin/llvm-rc-11 100
+          sudo update-alternatives --install /usr/bin/llvm-ranlib llvm-ranlib /usr/bin/llvm-ranlib-11 100
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install external libraries
+        id: install_vcpkg
+        run: |
+          git clone https://github.com/Microsoft/vcpkg.git
+          cd vcpkg
+          ./bootstrap-vcpkg.sh -disableMetrics -useSystemBinaries
+          ./vcpkg install catch2 benchmark
+
+      - name: Configure
+        id: configure
+        run: |
+          cmake . -GNinja \
+            -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }} \
+            -DCMAKE_TOOLCHAIN_FILE=`pwd`/vcpkg/scripts/buildsystems/vcpkg.cmake \
+            -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=`pwd`/config/cmake/toolchains/${{ matrix.config.toolchain }}.cmake \
+            -DTODO_RENAME_ME_CLANG_TIDY_PATH=${{ matrix.config.clang_tidy_path }}
+
+      - name: Build
+        id: build
+        run: ninja
+
+      - name: Test
+        id: test
+        run: ctest -j$(nproc) --output-on-failure

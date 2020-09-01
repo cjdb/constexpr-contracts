@@ -27,6 +27,7 @@ string(
    JOIN " " CMAKE_CXX_FLAGS_RELEASE
    "${CMAKE_CXX_FLAGS_RELEASE}"
    -fsanitize=cfi
+   -fno-sanitize=cfi-unrelated-cast # TODO(cjdb): remove once Catch2 properly supports cfi
 )
 
 string(

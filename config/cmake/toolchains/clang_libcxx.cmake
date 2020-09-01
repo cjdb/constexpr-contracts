@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-include("${CMAKE_CURRENT_LIST_DIR}/gnu-flags.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/gnu_base.cmake")
 
 set(CMAKE_CXX_COMPILER "clang++")
 set(PROJECT_TEMPLATE_CXX_COMPILER_MINIMUM_VERSION 11)
 
-set(CMAKE_AR "llvm-ar-11")
-set(CMAKE_RC_COMPILER "llvm-rc-11")
-set(CMAKE_RANLIB "llvm-ranlib-11")
+set(CMAKE_AR "llvm-ar")
+set(CMAKE_RC_COMPILER "llvm-rc")
+set(CMAKE_RANLIB "llvm-ranlib")
 
 string(
    JOIN " " CMAKE_CXX_FLAGS
