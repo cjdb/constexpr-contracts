@@ -79,7 +79,7 @@
 		"span": "cpp",
 		"stack": "cpp"
 	},
-	"clangd.path": "/usr/bin/clangd-11",
+	"clangd.path": "/usr/bin/clangd",
 	"clangd.semanticHighlighting": true,
 	"clangd.arguments": [
 		"--compile-commands-dir=${workspaceFolder}/build",
