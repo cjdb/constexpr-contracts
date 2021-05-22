@@ -1,0 +1,9 @@
+{
+    "name": "project-template",
+    "version-string": "LIVE_AT_HEAD",
+    "homepage": "https://github.com/cjdb/project_template.git",
+    "description": "A new project template",
+    "dependencies": [
+        "catch2"
+    ]
+}

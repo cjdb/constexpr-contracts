@@ -83,6 +83,13 @@
 	"clangd.semanticHighlighting": true,
 	"clangd.arguments": [
 		"--compile-commands-dir=${workspaceFolder}/build",
+		// "--clang-tidy",
+		"--background-index",
+		"--completion-style=detailed",
+		"--header-insertion=iwyu",
+		"-j=4",
+		"--malloc-trim",
+		"--pch-storage=memory",
 		"--clang-tidy"
 	],
 	"clangd.checkUpdates": true,
@@ -98,4 +105,5 @@
 	"cmake.configureOnOpen": true,
 	"cmake.generator": "Ninja",
 	"cmake.saveBeforeBuild": true,
+	"editor.formatOnSave": true,
 }

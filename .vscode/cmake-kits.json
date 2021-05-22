@@ -7,6 +7,7 @@
 		},
 		"cmakeSettings": {
 			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/gcc_libstdcxx.cmake",
+			"VCPKG_TARGET_TRIPLET": "gcc_libstdcxx",
 			"TODO_RENAME_ME_CLANG_TIDY_PATH": "/usr/bin/clang-tidy"
 		}
 	},
@@ -18,7 +19,8 @@
 		},
 		"cmakeSettings": {
 			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/gcc_libstdcxx.cmake",
-			"TODO_RENAME_ME_ENABLE_CLANG_TIDY_PATH": "Off"
+			"VCPKG_TARGET_TRIPLET": "gcc_libstdcxx",
+			"TODO_RENAME_ME_ENABLE_CLANG_TIDY": "Off"
 		}
 	},
 	{
@@ -29,6 +31,7 @@
 		},
 		"cmakeSettings": {
 			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/clang_libstdcxx.cmake",
+			"VCPKG_TARGET_TRIPLET": "clang_libstdcxx",
 			"TODO_RENAME_ME_CLANG_TIDY_PATH": "/usr/bin/clang-tidy"
 		}
 	},
@@ -40,6 +43,7 @@
 		},
 		"cmakeSettings": {
 			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/clang_libstdcxx.cmake",
+			"VCPKG_TARGET_TRIPLET": "clang_libstdcxx",
 			"TODO_RENAME_ME_ENABLE_CLANG_TIDY": "Off"
 		}
 	},
@@ -51,6 +55,7 @@
 		},
 		"cmakeSettings": {
 			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/clang_libcxx.cmake",
+			"VCPKG_TARGET_TRIPLET": "clang_libcxx",
 			"TODO_RENAME_ME_CLANG_TIDY_PATH": "/usr/bin/clang-tidy"
 		}
 	},
@@ -62,6 +67,7 @@
 		},
 		"cmakeSettings": {
 			"VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${workspaceFolder}/config/cmake/toolchains/clang_libcxx.cmake",
+			"VCPKG_TARGET_TRIPLET": "clang_libcxx",
 			"TODO_RENAME_ME_ENABLE_CLANG_TIDY": "Off"
 		}
 	}

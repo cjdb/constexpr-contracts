@@ -9,10 +9,10 @@ AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: None
 AlignConsecutiveBitFields: None
 AlignConsecutiveDeclarations: None
-AlignConsecutiveMacros: None
-AlignEscapedNewlines: Right
+AlignConsecutiveMacros: AcrossEmptyLinesAndComments
+AlignEscapedNewlines: Left
 AlignOperands: AlignAfterOperator
-AlignTrailingComments: false
+AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: false
 AllowAllConstructorInitializersOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
@@ -27,6 +27,7 @@ AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: Yes
+AttributeMacros: []
 BinPackArguments: false
 BinPackParameters: false
 BitFieldColonSpacing: Both
@@ -55,7 +56,7 @@ BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeComma
 BreakStringLiterals: true
-ColumnLimit: 100
+ColumnLimit: 120
 CompactNamespaces: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 0
@@ -63,9 +64,12 @@ ContinuationIndentWidth: 3
 Cpp11BracedListStyle: true
 DeriveLineEnding: false
 DerivePointerAlignment: false
+EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: Never
 FixNamespaceComments: true
+ForEachMacros: []
 IncludeBlocks: Preserve
+IndentAccessModifiers: false
 IndentCaseBlocks: false
 IndentCaseLabels: false
 IndentExternBlock: true
@@ -78,6 +82,7 @@ InsertTrailingCommas: Wrapped
 KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: All
+NamespaceMacros: []
 PenaltyBreakAssignment: 10
 PenaltyBreakBeforeFirstCallParameter: 10
 PenaltyBreakComment: 10
@@ -88,7 +93,9 @@ PenaltyExcessCharacter: 10
 PenaltyIndentedWhitespace: 10
 PenaltyReturnTypeOnItsOwnLine: 10
 PointerAlignment: Left
+RawStringFormats: []
 ReflowComments: true
+ShortNamespaceLines: 1
 SortIncludes: true
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
@@ -113,5 +120,7 @@ SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 TabWidth: 3
+TypenameMacros: []
 UseCRLF: false
 UseTab: ForIndentation
+WhitespaceSensitiveMacros: []

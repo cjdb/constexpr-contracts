@@ -24,38 +24,36 @@ jobs:
           sudo apt-get remove -y .*clang.* .*llvm.*
           sudo apt-get autoremove -y
           sudo apt-get install -y \
-            clang-format-12       \
-            clang-tidy-12         \
-            clang-tools-12        \
-            clang-12              \
-            libc++-12-dev         \
-            libc++1-12            \
-            libc++abi-12-dev      \
-            libc++abi1-12         \
-            libclang-12-dev       \
-            libclang1-12          \
-            libllvm-12-ocaml-dev  \
-            libomp-12-dev         \
-            libomp5-12            \
-            lld-12                \
-            llvm-12-dev           \
-            llvm-12-runtime       \
-            llvm-12               \
-            python3-clang-12      \
+            clang-format-13       \
+            clang-tidy-13         \
+            clang-tools-13        \
+            clang-13              \
+            libc++-13-dev         \
+            libc++1-13            \
+            libc++abi-13-dev      \
+            libc++abi1-13         \
+            libclang-13-dev       \
+            libclang1-13          \
+            lld-13                \
+            llvm-13-dev           \
+            llvm-13-runtime       \
+            llvm-13               \
+            python3-clang-13      \
             cmake                 \
-            g++-10                \
+            gcc-11                \
+            g++-11                \
             ninja-build
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
-          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-12 100
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-12 100
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-12 100
-          sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-12 100
-          sudo update-alternatives --install /usr/bin/git-clang-format git-clang-format /usr/bin/git-clang-format-12 100
-          sudo update-alternatives --install /usr/bin/llvm-ar llvm-ar /usr/bin/llvm-ar-12 100
-          sudo update-alternatives --install /usr/bin/llvm-as llvm-as /usr/bin/llvm-as-12 100
-          sudo update-alternatives --install /usr/bin/llvm-rc llvm-rc /usr/bin/llvm-rc-12 100
-          sudo update-alternatives --install /usr/bin/llvm-ranlib llvm-ranlib /usr/bin/llvm-ranlib-12 100
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-13 100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-13 100
+          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-13 100
+          sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-13 100
+          sudo update-alternatives --install /usr/bin/git-clang-format git-clang-format /usr/bin/git-clang-format-13 100
+          sudo update-alternatives --install /usr/bin/llvm-ar llvm-ar /usr/bin/llvm-ar-13 100
+          sudo update-alternatives --install /usr/bin/llvm-as llvm-as /usr/bin/llvm-as-13 100
+          sudo update-alternatives --install /usr/bin/llvm-rc llvm-rc /usr/bin/llvm-rc-13 100
+          sudo update-alternatives --install /usr/bin/llvm-ranlib llvm-ranlib /usr/bin/llvm-ranlib-13 100
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -64,11 +62,10 @@ jobs:
 
       - name: Formatting
         id: git_clang_format
-        run:
-          git-clang-format-12
-            --style=file
-            --extensions c,cc,cpp,cxx,h,hh,hpp,hxx
-            --diff origin/main HEAD
+        run: git-clang-format-13
+          --style=file
+          --extensions c,cc,cpp,cxx,h,hh,hpp,hxx
+          --diff origin/main HEAD
 
       - name: Install external libraries
         id: install_vcpkg
@@ -77,19 +74,16 @@ jobs:
           cp config/vcpkg/${{ matrix.toolchain }}.cmake vcpkg/triplets/community/.
           cd vcpkg
           ./bootstrap-vcpkg.sh -disableMetrics -useSystemBinaries
-          ./vcpkg install --triplet=${{ matrix.toolchain }} catch2
-          ./vcpkg install --triplet=${{ matrix.toolchain }} --head benchmark
 
       - name: Configure
         id: configure
-        run:
-          cmake . -GNinja
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-            -DCMAKE_TOOLCHAIN_FILE=`pwd`/vcpkg/scripts/buildsystems/vcpkg.cmake
-            -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=`pwd`/config/cmake/toolchains/${{ matrix.toolchain }}.cmake
-            -DVCPKG_TARGET_TRIPLET=${{ matrix.toolchain }}
-            -DTODO_RENAME_ME_ENABLE_CLANG_TIDY=${{ matrix.clang_tidy }}
-            -DTODO_RENAME_ME_CLANG_TIDY_PATH=${{ matrix.clang_tidy_path }}
+        run: cmake . -GNinja
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_TOOLCHAIN_FILE=`pwd`/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=`pwd`/config/cmake/toolchains/${{ matrix.toolchain }}.cmake
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.toolchain }}
+          -DTODO_RENAME_ME_ENABLE_CLANG_TIDY=${{ matrix.clang_tidy }}
+          -DTODO_RENAME_ME_CLANG_TIDY_PATH=${{ matrix.clang_tidy_path }}
 
       - name: Build
         id: build

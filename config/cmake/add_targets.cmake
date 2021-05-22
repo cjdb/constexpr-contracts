@@ -89,7 +89,6 @@ function(cxx_library)
 	target_link_libraries("${add_target_args_TARGET}" PUBLIC "${add_target_args_LINK_AND_EXPORT}")
 endfunction()
 
-set(PROJECT_TEMPLATE_ALERT_MISSING_TEST_FRAMEWORK Off)
 function(cxx_test)
 	cxx_binary(${ARGN})
 
@@ -103,23 +102,11 @@ function(cxx_test)
 	   ${ARGN}
 	)
 
-	if(add_target_args_TEST_FRAMEWORK)
-		set(TEST_FRAMEWORK "${add_target_args_TEST_FRAMEWORK}")
-	else()
-		if(NOT PROJECT_TEMPLATE_ALERT_MISSING_TEST_FRAMEWORK)
-			message(STATUS "TEST_FRAMEWORK not provided, defaulting to Catch2.")
-			find_package(Catch2 CONFIG REQUIRED)
-			set(PROJECT_TEMPLATE_ALERT_MISSING_TEST_FRAMEWORK On)
-		endif()
-
-		set(TEST_FRAMEWORK "Catch2::Catch2")
-	endif()
-
 	target_link_libraries(
 	   "${add_target_args_TARGET}"
 	   PRIVATE
-	   ${TEST_FRAMEWORK}
-	   test_main
+	   ${${PROJECT_NAME}_TEST_FRAMEWORK}
+	   $<$<BOOL:${${PROJECT_NAME}_NEEDS_TEST_MAIN}>:test_main>
 	)
 
 	add_test("test.${add_target_args_TARGET}" "${add_target_args_TARGET}")

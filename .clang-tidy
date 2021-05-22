@@ -1,8 +1,8 @@
 # Copyright (c) Christopher Di Bella.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
-Checks:           'abseil-*,boost-*,bugprone-*,cert-*,clang-analyzer-*,cppcoreguildelines-*,google-*,misc-*,modernize-*,performance-*,portability-*,readability-*,-bugprone-exception-escape,-cert-msc32-c,-cert-msc51-cpp,-clang-diagnostic-missing-prototypes,-clang-diagnostic-unused-command-line-argument,-google-runtime-int,-google-runtime-references,-misc-no-recursion,-misc-non-private-member-variables-in-classes,-modernize-use-trailing-return-type,-readability-function-size,-readability-named-parameter,-readability-qualified-auto'
-WarningsAsErrors: '*'
+Checks: 'abseil-*,boost-*,bugprone-*,-bugprone-exception-escape,cert-*,-cert-dcl21-cpp,-cert-msc32-c,-cert-msc51-cpp,clang-analyzer-*,clang-diagnostic-*,-clang-diagnostic-missing-prototypes,-clang-diagnostic-unused-command-line-argument,cppcoreguildelines-*,google-*,  -google-runtime-int,  -google-runtime-references,misc-*,-misc-no-recursion,-misc-non-private-member-variables-in-classes,modernize-*,-modernize-use-trailing-return-type,performance-*,portability-*,readability-*,-readability-function-size,-readability-named-parameter,-readability-qualified-auto'
+WarningsAsErrors: '*,-clang-diagnostic-ignored-optimization-argument'
 
 CheckOptions:
   - key: bugprone-assert-side-effect
@@ -16,7 +16,7 @@ CheckOptions:
   - key: readability-simplify-boolean-expr.ChainedConditionalAssignment
     value: '1'
   - key: readability-simplify-subscript-expr.Types
-    value: '::std::basic_string;::std::basic_string_view;::std::vector;::std::array,::std::span'
+    value: '::std::array;::std::basic_string;::std::basic_string_view;::std::span;::std::vector'
 
   - key: readability-identifier-naming.ClassCase
     value: "lower_case"

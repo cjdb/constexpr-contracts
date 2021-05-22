@@ -1,3 +1,6 @@
+set(${PROJECT_NAME}_TEST_FRAMEWORK "Catch2::Catch2" CACHE STRING "")
+set(${PROJECT_NAME}_NEEDS_TEST_MAIN ON CACHE BOOL "")
+
 cxx_library(
    TARGET test_main
    FILENAMES "test_main.cpp"
