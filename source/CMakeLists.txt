@@ -1,11 +1,14 @@
+# Copyright (c) Christopher Di Bella.
+# SPDX-License-Identifier: Apache-2.0
+#
 cxx_library(
    TARGET greeting
-   FILENAMES "greeting.cpp"
+   FILENAME "greeting.cpp"
 )
 
 cxx_binary(
    TARGET main1
-   FILENAMES "main.cpp"
+   FILENAME "main.cpp"
    LINK_TARGETS greeting
 )
 

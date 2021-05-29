@@ -10,6 +10,7 @@ macro(PROJECT_TEMPLATE_EXTRACT_ADD_TARGET_ARGS optional_values single_value_args
 	   single_value_args2
 	   "${single_value_args}"
 	   TARGET
+	   FILENAME
 	)
 	set(
 	   multi_value_args2
@@ -33,8 +34,10 @@ macro(PROJECT_TEMPLATE_EXTRACT_ADD_TARGET_ARGS optional_values single_value_args
 		message(FATAL_ERROR "TARGET is not set. Cannot build a target without naming it!")
 	endif()
 
-	if("${add_target_args_FILENAMES}" STREQUAL "")
-		message(FATAL_ERROR "FILENAMES not set. Cannot build target ${add_target_args_TARGET} without any files.")
+	if(add_target_args_FILENAME AND add_target_args_FILENAMES)
+		message(FATAL_ERROR "FILENAME and FILENAMES can't both be set.")
+	elseif(NOT add_target_args_FILENAME AND NOT add_target_args_FILENAMES)
+		message(FATAL_ERROR "Neither FILENAME nor FILENAMES are set. Cannot build target ${add_target_args_TARGET} without any files to build.")
 	endif()
 endmacro()
 
@@ -49,7 +52,7 @@ function(cxx_binary)
 	   ${ARGN}
 	)
 
-	add_executable("${add_target_args_TARGET}" "${add_target_args_FILENAMES}")
+	add_executable("${add_target_args_TARGET}" "${add_target_args_FILENAME}" "${add_target_args_FILENAMES}")
 	target_include_directories("${add_target_args_TARGET}" PUBLIC "${PROJECT_SOURCE_DIR}/include")
 
 	target_compile_definitions("${add_target_args_TARGET}" PRIVATE "${add_target_args_DEFINITIONS}")
@@ -76,7 +79,7 @@ function(cxx_library)
 		message(FATAL_ERROR "Cannot add a library of type \"${add_target_args_LIBRARY_TYPE}\"")
 	endif()
 
-	add_library("${add_target_args_TARGET}" ${add_target_args_LIBRARY_TYPE} "${add_target_args_FILENAMES}")
+	add_library("${add_target_args_TARGET}" ${add_target_args_LIBRARY_TYPE} "${add_target_args_FILENAME}" "${add_target_args_FILENAMES}")
 	target_include_directories("${add_target_args_TARGET}" PUBLIC "${PROJECT_SOURCE_DIR}/include")
 
 	target_compile_definitions("${add_target_args_TARGET}" PRIVATE "${add_target_args_DEFINITIONS}")

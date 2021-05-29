@@ -99,7 +99,7 @@
 		"-pedantic",
 		"-Wall",
 		"-Wextra",
-		"-Werror"
+		"-Werror",
 	],
 	"cmake.buildBeforeRun": true,
 	"cmake.configureOnOpen": true,
