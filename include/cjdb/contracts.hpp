@@ -4,9 +4,47 @@
 #ifndef CJDB_CONTRACTS_HPP
 #define CJDB_CONTRACTS_HPP
 
-#include <cstdio>
-#include <string_view>
+#include <cstring>
 #include <type_traits>
+
+#ifdef _MSC_VER
+	#define CJDB_PRETTY_FUNCTION __FUNCSIG__
+	#define CJDB_FORCE_INLINE __forceinline
+#else
+	#define CJDB_PRETTY_FUNCTION __PRETTY_FUNCTION__
+	#define CJDB_FORCE_INLINE [[gnu::always_inline]] inline
+#endif // _MSC_VER
+
+#ifndef CJDB_PRINT_ERROR
+	#ifdef CJDB_USE_STDIO
+		#include <cstdio>
+
+		namespace cjdb::contracts_detail {
+			struct print_error_fn {
+				template<std::size_t N>
+				CJDB_FORCE_INLINE void operator()(char const(&message)[N]) const noexcept
+				{
+					std::fwrite(message, sizeof(char), N - 1, stderr);
+				}
+			};
+			inline constexpr auto print_error = print_error_fn{};
+		} // namespace cjdb::contracts_detail
+	#else
+		#include <iostream>
+
+		namespace cjdb::contracts_detail {
+			struct print_error_fn {
+				template<std::streamsize N>
+				CJDB_FORCE_INLINE void operator()(char const(&message)[N]) const noexcept
+				try {
+					std::cerr.write(message, N - 1);
+				} catch(...) {}
+			};
+			inline constexpr auto print_error = print_error_fn{};
+		} // namespace cjdb::contracts_detail
+	#endif // CJDB_USE_STDIO
+	#define CJDB_PRINT_ERROR(MESSAGE) ::cjdb::contracts_detail::print_error(MESSAGE)
+#endif // CJDB_PRINT_ERROR
 
 // clang-tidy doesn't yet support this
 //
@@ -18,28 +56,30 @@
 #define CJDB_ASSERT(...)  CJDB_CONTRACT_IMPL("assertion", __VA_ARGS__)
 #define CJDB_ENSURES(...) CJDB_CONTRACT_IMPL("post-condition", __VA_ARGS__)
 
-#ifdef _MSC_VER
-	#define CJDB_PRETTY_FUNCTION __FUNCSIG__
-#else
-	#define CJDB_PRETTY_FUNCTION __PRETTY_FUNCTION__
-#endif // _MSC_VER
-
 namespace cjdb::contracts_detail {
 	#ifdef NDEBUG
-		inline constexpr auto is_debug = false;
+		inline constexpr bool is_debug = false;
 	#else
-		inline constexpr auto is_debug = true;
+		inline constexpr bool is_debug = true;
 	#endif // NDEBUG
 
 	struct contract_impl_fn {
+		template<std::size_t N1, std::size_t N2>
 		constexpr void operator()(bool const result,
-		                          std::string_view const message,
-		                          std::string_view const function) const noexcept
+		                          char const(&message)[N1],
+		                          char const(&function)[N2]) const noexcept
 		{
-			if (not result) {
+			if (not result) [[unlikely]] {
 				if (not std::is_constant_evaluated()) {
 					if constexpr (is_debug) {
-						std::fprintf(stderr, "%s in `%s`\n", message.data(), function.data());
+						constexpr auto& suffix = "`\n";
+						constexpr auto message_size = N1 - 1, function_size = N2 - 1;
+						char full_message[message_size + function_size + sizeof suffix];
+						auto p = full_message;
+						std::memcpy(p, message, message_size);
+						std::memcpy(p += message_size, function, function_size);
+						std::memcpy(p += function_size, suffix, sizeof suffix);
+						CJDB_PRINT_ERROR(full_message);
 					}
 				}
 			#ifdef _MSC_VER
@@ -69,9 +109,8 @@ namespace cjdb::contracts_detail {
 
 #define CJDB_CONTRACT_IMPL(CJDB_KIND, ...) \
    ::cjdb::contracts_detail::contract_impl(::cjdb::contracts_detail::matches_bool(__VA_ARGS__), \
-      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed",        \
+      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed in `", \
       CJDB_PRETTY_FUNCTION)
-
 
 #define CJDB_TO_STRING(CJDB_STRING) CJDB_TO_STRING_IMPL(CJDB_STRING)
 #define CJDB_TO_STRING_IMPL(CJDB_STRING) #CJDB_STRING
