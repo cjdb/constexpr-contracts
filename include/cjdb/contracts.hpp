@@ -21,7 +21,7 @@
 
 		namespace cjdb::contracts_detail {
 			struct print_error_fn {
-				CJDB_FORCE_INLINE void operator()(std::string_view message) const noexcept
+				CJDB_FORCE_INLINE void operator()(std::string_view const message) const noexcept
 				{
 					std::fwrite(message.data(), sizeof(char), message.size(), stderr);
 				}
@@ -33,7 +33,7 @@
 
 		namespace cjdb::contracts_detail {
 			struct print_error_fn {
-				CJDB_FORCE_INLINE void operator()(std::string_view message) const noexcept
+				CJDB_FORCE_INLINE void operator()(std::string_view const message) const noexcept
 				try {
 					std::cerr.write(message.data(),
 					                static_cast<std::streamsize>(message.size()));
