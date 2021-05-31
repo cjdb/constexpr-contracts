@@ -34,10 +34,10 @@
 
 		namespace cjdb::contracts_detail {
 			struct print_error_fn {
-				template<std::streamsize N>
+				template<std::size_t N>
 				CJDB_FORCE_INLINE void operator()(char const(&message)[N]) const noexcept
 				try {
-					std::cerr.write(message, N - 1);
+					std::cerr.write(message, static_cast<std::streamsize>(N) - 1);
 				} catch(...) {}
 			};
 			inline constexpr auto print_error = print_error_fn{};
@@ -73,7 +73,9 @@ namespace cjdb::contracts_detail {
 				if (not std::is_constant_evaluated()) {
 					if constexpr (is_debug) {
 						constexpr auto& suffix = "`\n";
-						constexpr auto message_size = N1 - 1, function_size = N2 - 1;
+						constexpr auto message_size = N1 - 1;
+						constexpr auto function_size = N2 - 1;
+						// NOLINTNEXTLINE(modernize-avoid-c-arrays)
 						char full_message[message_size + function_size + sizeof suffix]{};
 						auto p = full_message;
 						std::memcpy(p, message, message_size);
