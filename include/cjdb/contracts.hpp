@@ -35,8 +35,7 @@
 			struct print_error_fn {
 				CJDB_FORCE_INLINE void operator()(std::string_view const message) const noexcept
 				try {
-					std::cerr.write(message.data(),
-					                static_cast<std::streamsize>(message.size()));
+					std::cerr << message;
 				} catch(...) {}
 			};
 			inline constexpr auto print_error = print_error_fn{};
