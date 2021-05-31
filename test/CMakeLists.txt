@@ -3,15 +3,22 @@
 #
 function(build_contract filename)
 	set(target "${filename}")
+	set(target_ios "${filename}_ios")
 	add_executable("${target}" "${filename}.cpp")
+	add_executable("${target_ios}" "${filename}.cpp")
 	if(MSVC)
 		target_compile_options("${target}" PRIVATE "/permissive-")
+		target_compile_options("${target_ios}" PRIVATE "/permissive-" "/DCJDB_USE_IOSTREAM")
+	else()
+		target_compile_options("${target_ios}" PRIVATE "-DCJDB_USE_IOSTREAM")
 	endif()
 	target_include_directories("${target}" PRIVATE "${CMAKE_SOURCE_DIR}/include")
+	target_include_directories("${target_ios}" PRIVATE "${CMAKE_SOURCE_DIR}/include")
 endfunction()
 
 build_contract(pass)
 add_test(test.pass pass)
+add_test(test.pass_ios pass_ios)
 
 function(test_contract target expected_output)
 	set(args "${CMAKE_SOURCE_DIR}/test/check-failure.py"
@@ -21,6 +28,10 @@ function(test_contract target expected_output)
 		list(APPEND args "--debug=True")
 	endif()
 	add_test(NAME "test.${target}"
+	         COMMAND python3 ${args}
+	         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+	list(TRANSFORM args APPEND "_ios" AT 1)
+	add_test(NAME "test.${target}_ios"
 	         COMMAND python3 ${args}
 	         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 endfunction()

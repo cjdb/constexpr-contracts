@@ -67,7 +67,7 @@ namespace contracts_detail {
 						constexpr auto& suffix = "`\r\n";
 	#else
 						constexpr auto& suffix = "`\n";
-	#endif
+	#endif // _WIN32
 						::cjdb::print_error(message);
 						::cjdb::print_error(function);
 						::cjdb::print_error(suffix);
