@@ -27,7 +27,7 @@
 			CJDB_FORCE_INLINE void operator()(std::string_view const message) const noexcept
 	#ifdef CJDB_USE_IOSTREAM
 			try {
-				std::clog << message;
+				std::clog.write(message.data(), static_cast<std::streamsize>(message.size()));
 			} catch(...) {}
 	#else
 			{
