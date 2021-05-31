@@ -4,9 +4,46 @@
 #ifndef CJDB_CONTRACTS_HPP
 #define CJDB_CONTRACTS_HPP
 
-#include <cstdio>
 #include <string_view>
 #include <type_traits>
+
+#ifdef _MSC_VER
+	#define CJDB_PRETTY_FUNCTION __FUNCSIG__
+	#define CJDB_FORCE_INLINE __forceinline
+#else
+	#define CJDB_PRETTY_FUNCTION __PRETTY_FUNCTION__
+	#define CJDB_FORCE_INLINE [[gnu::always_inline]] inline
+#endif // _MSC_VER
+
+#ifndef CJDB_PRINT_ERROR
+	#ifdef CJDB_USE_STDIO
+		#include <cstdio>
+
+		namespace cjdb::contracts_detail {
+			struct print_error_fn {
+				CJDB_FORCE_INLINE void operator()(std::string_view message) const noexcept
+				{
+					std::fwrite(message.data(), sizeof(char), message.size(), stderr);
+				}
+			};
+			inline constexpr auto print_error = print_error_fn{};
+		} // namespace cjdb::contracts_detail
+	#else
+		#include <iostream>
+
+		namespace cjdb::contracts_detail {
+			struct print_error_fn {
+				CJDB_FORCE_INLINE void operator()(std::string_view message) const noexcept
+				try {
+					std::cerr.write(message.data(),
+					                static_cast<std::streamsize>(message.size()));
+				} catch(...) {}
+			};
+			inline constexpr auto print_error = print_error_fn{};
+		} // namespace cjdb::contracts_detail
+	#endif // CJDB_USE_STDIO
+	#define CJDB_PRINT_ERROR(MESSAGE) ::cjdb::contracts_detail::print_error(MESSAGE)
+#endif // CJDB_PRINT_ERROR
 
 // clang-tidy doesn't yet support this
 //
@@ -17,12 +54,6 @@
 #define CJDB_EXPECTS(...) CJDB_CONTRACT_IMPL("pre-condition", __VA_ARGS__)
 #define CJDB_ASSERT(...)  CJDB_CONTRACT_IMPL("assertion", __VA_ARGS__)
 #define CJDB_ENSURES(...) CJDB_CONTRACT_IMPL("post-condition", __VA_ARGS__)
-
-#ifdef _MSC_VER
-	#define CJDB_PRETTY_FUNCTION __FUNCSIG__
-#else
-	#define CJDB_PRETTY_FUNCTION __PRETTY_FUNCTION__
-#endif // _MSC_VER
 
 namespace cjdb::contracts_detail {
 	#ifdef NDEBUG
@@ -39,7 +70,9 @@ namespace cjdb::contracts_detail {
 			if (not result) {
 				if (not std::is_constant_evaluated()) {
 					if constexpr (is_debug) {
-						std::fprintf(stderr, "%s in `%s`\n", message.data(), function.data());
+						CJDB_PRINT_ERROR(message);
+						CJDB_PRINT_ERROR(function);
+						CJDB_PRINT_ERROR("`\n");
 					}
 				}
 			#ifdef _MSC_VER
@@ -69,7 +102,7 @@ namespace cjdb::contracts_detail {
 
 #define CJDB_CONTRACT_IMPL(CJDB_KIND, ...) \
    ::cjdb::contracts_detail::contract_impl(::cjdb::contracts_detail::matches_bool(__VA_ARGS__), \
-      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed",        \
+      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed in `", \
       CJDB_PRETTY_FUNCTION)
 
 
