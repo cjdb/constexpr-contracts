@@ -16,31 +16,27 @@
 #endif // _MSC_VER
 
 #ifndef CJDB_PRINT_ERROR
-	#ifdef CJDB_USE_STDIO
-		#include <cstdio>
-
-		namespace cjdb::contracts_detail {
-			struct print_error_fn {
-				CJDB_FORCE_INLINE void operator()(std::string_view const message) const noexcept
-				{
-					std::fwrite(message.data(), sizeof(char), message.size(), stderr);
-				}
-			};
-			inline constexpr auto print_error = print_error_fn{};
-		} // namespace cjdb::contracts_detail
-	#else
+	#ifdef CJDB_USE_IOSTREAM
 		#include <iostream>
+	#else
+		#include <cstdio>
+	#endif // CJDB_USE_IOSTREAM
 
-		namespace cjdb::contracts_detail {
-			struct print_error_fn {
-				CJDB_FORCE_INLINE void operator()(std::string_view const message) const noexcept
-				try {
-					std::cerr << message;
-				} catch(...) {}
-			};
-			inline constexpr auto print_error = print_error_fn{};
-		} // namespace cjdb::contracts_detail
-	#endif // CJDB_USE_STDIO
+	namespace cjdb::contracts_detail {
+		struct print_error_fn {
+			CJDB_FORCE_INLINE void operator()(std::string_view const message) const noexcept
+	#ifdef CJDB_USE_IOSTREAM
+			try {
+				std::clog << message;
+			} catch(...) {}
+	#else
+			{
+				std::fwrite(message.data(), sizeof(char), message.size(), stderr);
+			}
+	#endif // CJDB_USE_IOSTREAM
+		};
+		inline constexpr auto print_error = print_error_fn{};
+	} // namespace cjdb::contracts_detail
 	#define CJDB_PRINT_ERROR(MESSAGE) ::cjdb::contracts_detail::print_error(MESSAGE)
 #endif // CJDB_PRINT_ERROR
 
