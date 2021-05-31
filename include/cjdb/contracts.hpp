@@ -21,7 +21,7 @@
 
 		namespace cjdb::contracts_detail {
 			struct print_error_fn {
-				template<std::size_t N>
+				template<std::size_t N> // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 				CJDB_FORCE_INLINE void operator()(char const(&message)[N]) const noexcept
 				{
 					std::fwrite(message, sizeof(char), N - 1, stderr);
@@ -34,7 +34,7 @@
 
 		namespace cjdb::contracts_detail {
 			struct print_error_fn {
-				template<std::size_t N>
+				template<std::size_t N> // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 				CJDB_FORCE_INLINE void operator()(char const(&message)[N]) const noexcept
 				try {
 					std::cerr.write(message, static_cast<std::streamsize>(N) - 1);
@@ -66,8 +66,8 @@ namespace cjdb::contracts_detail {
 	struct contract_impl_fn {
 		template<std::size_t N1, std::size_t N2>
 		constexpr void operator()(bool const result,
-		                          char const(&message)[N1],
-		                          char const(&function)[N2]) const noexcept
+		                          char const(&message)[N1], // NOLINT(modernize-avoid-c-arrays)
+		                          char const(&function)[N2]) const noexcept // NOLINT(modernize-avoid-c-arrays)
 		{
 			if (not result) [[unlikely]] {
 				if (not std::is_constant_evaluated()) {
