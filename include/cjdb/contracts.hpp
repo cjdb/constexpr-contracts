@@ -74,7 +74,7 @@ namespace cjdb::contracts_detail {
 					if constexpr (is_debug) {
 						constexpr auto& suffix = "`\n";
 						constexpr auto message_size = N1 - 1, function_size = N2 - 1;
-						char full_message[message_size + function_size + sizeof suffix];
+						char full_message[message_size + function_size + sizeof suffix]{};
 						auto p = full_message;
 						std::memcpy(p, message, message_size);
 						std::memcpy(p += message_size, function, function_size);
