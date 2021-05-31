@@ -1,10 +1,11 @@
+
 // Copyright (c) Christopher Di Bella.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 #ifndef CJDB_CONTRACTS_HPP
 #define CJDB_CONTRACTS_HPP
 
-#include <string_view>
+#include <cstring>
 #include <type_traits>
 
 #ifdef _MSC_VER
@@ -21,9 +22,10 @@
 
 		namespace cjdb::contracts_detail {
 			struct print_error_fn {
-				CJDB_FORCE_INLINE void operator()(std::string_view message) const noexcept
+				template<std::size_t N> // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+				CJDB_FORCE_INLINE void operator()(char const(&message)[N]) const noexcept
 				{
-					std::fwrite(message.data(), sizeof(char), message.size(), stderr);
+					std::fwrite(message, sizeof(char), N - 1, stderr);
 				}
 			};
 			inline constexpr auto print_error = print_error_fn{};
@@ -33,10 +35,10 @@
 
 		namespace cjdb::contracts_detail {
 			struct print_error_fn {
-				CJDB_FORCE_INLINE void operator()(std::string_view message) const noexcept
+				template<std::size_t N> // NOLINTNEXTLINE(modernize-avoid-c-arrays)
+				CJDB_FORCE_INLINE void operator()(char const(&message)[N]) const noexcept
 				try {
-					std::cerr.write(message.data(),
-					                static_cast<std::streamsize>(message.size()));
+					std::cerr.write(message, static_cast<std::streamsize>(N) - 1);
 				} catch(...) {}
 			};
 			inline constexpr auto print_error = print_error_fn{};
@@ -63,16 +65,24 @@ namespace cjdb::contracts_detail {
 	#endif // NDEBUG
 
 	struct contract_impl_fn {
+		template<std::size_t N1, std::size_t N2>
 		constexpr void operator()(bool const result,
-		                          std::string_view const message,
-		                          std::string_view const function) const noexcept
+		                          char const(&message)[N1], // NOLINT(modernize-avoid-c-arrays)
+		                          char const(&function)[N2]) const noexcept // NOLINT(modernize-avoid-c-arrays)
 		{
 			if (not result) {
 				if (not std::is_constant_evaluated()) {
-					if constexpr (is_debug) {
-						CJDB_PRINT_ERROR(message);
-						CJDB_PRINT_ERROR(function);
-						CJDB_PRINT_ERROR("`\n");
+					if constexpr (is_debug) { // NOLINT
+						constexpr auto& suffix = "`\n";
+						constexpr auto message_size = N1 - 1;
+						constexpr auto function_size = N2 - 1;
+						// NOLINTNEXTLINE(modernize-avoid-c-arrays)
+						char full_message[message_size + function_size + sizeof suffix]{};
+						auto p = full_message;
+						std::memcpy(p, message, message_size);
+						std::memcpy(p += message_size, function, function_size);
+						std::memcpy(p += function_size, suffix, sizeof suffix);
+						CJDB_PRINT_ERROR(full_message);
 					}
 				}
 			#ifdef _MSC_VER
