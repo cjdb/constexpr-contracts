@@ -71,7 +71,7 @@ namespace cjdb::contracts_detail {
 		{
 			if (not result) [[unlikely]] {
 				if (not std::is_constant_evaluated()) {
-					if constexpr (is_debug) { // NOLINT(bugprone-suspicious-semicolon)
+					if constexpr (is_debug) { // NOLINT
 						constexpr auto& suffix = "`\n";
 						constexpr auto message_size = N1 - 1;
 						constexpr auto function_size = N2 - 1;
