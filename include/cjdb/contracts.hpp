@@ -36,7 +36,7 @@ namespace cjdb::contracts_detail {
 		                          std::string_view const message,
 		                          std::string_view const function) const noexcept
 		{
-			if (not result) {
+			if (not result) [[unlikely]] {
 				if (not std::is_constant_evaluated()) {
 					if constexpr (is_debug) {
 						std::fprintf(stderr, "%s in `%s`\n", message.data(), function.data());
