@@ -33,16 +33,17 @@
 
 namespace cjdb {
 	using print_error_fn = void(std::string_view);
-	inline print_error_fn* print_error = [](std::string_view message) {
-#ifdef CJDB_USE_IOSTREAM
+	inline print_error_fn* print_error = [](std::string_view message)
+	{
+	#ifdef CJDB_USE_IOSTREAM
 		std::cerr.write(message.data(), static_cast<std::streamsize>(message.size()));
-#elif !defined(CJDB_SKIP_STDIO)
+	#elif !defined(CJDB_SKIP_STDIO)
 		if (auto const len = message.size();
 			std::fwrite(message.data(), sizeof(char), len, stderr) < len) [[unlikely]]
 		{
 			throw std::system_error{errno, std::system_category()};
 		}
-#endif // CJDB_USE_IOSTREAM
+	#endif // CJDB_USE_IOSTREAM
 	};
 
 namespace contracts_detail {

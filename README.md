@@ -195,12 +195,17 @@ generation than when the contract isn't used. [See for yourself][__builtin_unrea
 	</tbody>
 </table>
 
-*Rudimentary testing has identified that neither GCC nor Clang perform optimisations <em>before</em>
-the contract.*
+\*Rudimentary testing has identified that neither GCC nor Clang perform optimisations <em>before</em>
+the contract.
 
 ### Configuring diagnostics
 
-By default, diagnostic messages are printed to `stderr` by `std::fwrite`. If `CJDB_USE_IOSTREAM` is defined as a macro, messages are printed with `std::cerr.write` instead. If `CJDB_SKIP_STDIO` is defined as a macro, there is no dependency on either `cstdio` or `iostream` and printing diagnostic messages is a no-op. If you would like to customize how diagnostics are printed, you may set the function pointer `cjdb::print_error` to any function or lambda with the signature `void(std::string_view)`.
+By default, diagnostic messages are printed to `stderr` by `std::fwrite`. If `CJDB_USE_IOSTREAM` is
+defined as a macro, messages are printed with `std::cerr.write` instead. If `CJDB_SKIP_STDIO` is
+defined as a macro, there is no dependency on either `cstdio` or `iostream` and printing diagnostic
+messages is a no-op. If you would like to customize how diagnostics are printed, you may set the
+function pointer `cjdb::print_error` to any function or lambda with the signature
+`void(std::string_view)`.
 
 ### Assertions
 
