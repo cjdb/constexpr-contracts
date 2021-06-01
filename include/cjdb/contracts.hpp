@@ -4,9 +4,16 @@
 #ifndef CJDB_CONTRACTS_HPP
 #define CJDB_CONTRACTS_HPP
 
-#include <cstdio>
 #include <string_view>
 #include <type_traits>
+
+#ifdef CJDB_USE_IOSTREAM
+	#include <iostream>
+#elif !defined(CJDB_SKIP_STDIO)
+	#include <cerrno>
+	#include <cstdio>
+	#include <system_error>
+#endif // CJDB_USE_IOSTREAM
 
 // clang-tidy doesn't yet support this
 //
@@ -24,7 +31,22 @@
 	#define CJDB_PRETTY_FUNCTION __PRETTY_FUNCTION__
 #endif // _MSC_VER
 
-namespace cjdb::contracts_detail {
+namespace cjdb {
+	using print_error_fn = void(std::string_view);
+	inline print_error_fn* print_error = [](std::string_view message)
+	{
+	#ifdef CJDB_USE_IOSTREAM
+		std::cerr.write(message.data(), static_cast<std::streamsize>(message.size()));
+	#elif !defined(CJDB_SKIP_STDIO)
+		if (auto const len = message.size();
+			std::fwrite(message.data(), sizeof(char), len, stderr) < len) [[unlikely]]
+		{
+			throw std::system_error{errno, std::system_category()};
+		}
+	#endif // CJDB_USE_IOSTREAM
+	};
+
+namespace contracts_detail {
 	#ifdef NDEBUG
 		inline constexpr auto is_debug = false;
 	#else
@@ -34,12 +56,19 @@ namespace cjdb::contracts_detail {
 	struct contract_impl_fn {
 		constexpr void operator()(bool const result,
 		                          std::string_view const message,
-		                          std::string_view const function) const noexcept
+		                          std::string_view const function) const noexcept(!is_debug)
 		{
 			if (not result) [[unlikely]] {
 				if (not std::is_constant_evaluated()) {
 					if constexpr (is_debug) {
-						std::fprintf(stderr, "%s in `%s`\n", message.data(), function.data());
+					#ifdef _WIN32
+						constexpr auto& suffix = "`\r\n";
+					#else
+						constexpr auto& suffix = "`\n";
+					#endif // _WIN32
+						::cjdb::print_error(message);
+						::cjdb::print_error(function);
+						::cjdb::print_error(suffix);
 					}
 				}
 			#ifdef _MSC_VER
@@ -65,11 +94,12 @@ namespace cjdb::contracts_detail {
 		}
 	};
 	inline constexpr auto matches_bool = matches_bool_fn{};
-} // namespace cjdb::contracts_detail
+} // namespace contracts_detail
+} // namespace cjdb
 
 #define CJDB_CONTRACT_IMPL(CJDB_KIND, ...) \
    ::cjdb::contracts_detail::contract_impl(::cjdb::contracts_detail::matches_bool(__VA_ARGS__), \
-      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed",        \
+      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed in `", \
       CJDB_PRETTY_FUNCTION)
 
 
