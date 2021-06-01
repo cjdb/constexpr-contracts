@@ -96,7 +96,7 @@ namespace contracts_detail {
 		}
 	};
 	inline constexpr auto matches_bool = matches_bool_fn{};
-} // namespace cjdb::contracts_detail
+} // namespace contracts_detail
 } // namespace cjdb
 
 #define CJDB_CONTRACT_IMPL(CJDB_KIND, ...) \
