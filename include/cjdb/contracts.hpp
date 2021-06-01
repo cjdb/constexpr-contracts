@@ -6,46 +6,16 @@
 #define CJDB_CONTRACTS_HPP
 
 #include <cstring>
+#include <string_view>
 #include <type_traits>
 
-#ifdef _MSC_VER
-	#define CJDB_PRETTY_FUNCTION __FUNCSIG__
-	#define CJDB_FORCE_INLINE __forceinline
-#else
-	#define CJDB_PRETTY_FUNCTION __PRETTY_FUNCTION__
-	#define CJDB_FORCE_INLINE [[gnu::always_inline]] inline
-#endif // _MSC_VER
-
-#ifndef CJDB_PRINT_ERROR
-	#ifdef CJDB_USE_STDIO
-		#include <cstdio>
-
-		namespace cjdb::contracts_detail {
-			struct print_error_fn {
-				template<std::size_t N> // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-				CJDB_FORCE_INLINE void operator()(char const(&message)[N]) const noexcept
-				{
-					std::fwrite(message, sizeof(char), N - 1, stderr);
-				}
-			};
-			inline constexpr auto print_error = print_error_fn{};
-		} // namespace cjdb::contracts_detail
-	#else
-		#include <iostream>
-
-		namespace cjdb::contracts_detail {
-			struct print_error_fn {
-				template<std::size_t N> // NOLINTNEXTLINE(modernize-avoid-c-arrays)
-				CJDB_FORCE_INLINE void operator()(char const(&message)[N]) const noexcept
-				try {
-					std::cerr.write(message, static_cast<std::streamsize>(N) - 1);
-				} catch(...) {}
-			};
-			inline constexpr auto print_error = print_error_fn{};
-		} // namespace cjdb::contracts_detail
-	#endif // CJDB_USE_STDIO
-	#define CJDB_PRINT_ERROR(MESSAGE) ::cjdb::contracts_detail::print_error(MESSAGE)
-#endif // CJDB_PRINT_ERROR
+#ifdef CJDB_USE_IOSTREAM
+	#include <iostream>
+#elif !defined(CJDB_SKIP_STDIO)
+	#include <cerrno>
+	#include <cstdio>
+	#include <system_error>
+#endif // CJDB_USE_IOSTREAM
 
 // clang-tidy doesn't yet support this
 //
@@ -57,7 +27,27 @@
 #define CJDB_ASSERT(...)  CJDB_CONTRACT_IMPL("assertion", __VA_ARGS__)
 #define CJDB_ENSURES(...) CJDB_CONTRACT_IMPL("post-condition", __VA_ARGS__)
 
-namespace cjdb::contracts_detail {
+#ifdef _MSC_VER
+	#define CJDB_PRETTY_FUNCTION __FUNCSIG__
+#else
+	#define CJDB_PRETTY_FUNCTION __PRETTY_FUNCTION__
+#endif // _MSC_VER
+
+namespace cjdb {
+	using print_error_fn = void(std::string_view);
+	inline print_error_fn *print_error = [](std::string_view message) {
+#ifdef CJDB_USE_IOSTREAM
+		std::cerr.write(message.data(), static_cast<std::streamsize>(message.size()));
+#elif !defined(CJDB_SKIP_STDIO)
+		if (auto const len = message.size();
+			std::fwrite(message.data(), sizeof(char), len, stderr) < len) [[unlikely]]
+		{
+			throw std::system_error{errno, std::system_category()};
+		}
+#endif // CJDB_USE_IOSTREAM
+	};
+
+namespace contracts_detail {
 	#ifdef NDEBUG
 		inline constexpr auto is_debug = false;
 	#else
@@ -73,7 +63,11 @@ namespace cjdb::contracts_detail {
 			if (not result) {
 				if (not std::is_constant_evaluated()) {
 					if constexpr (is_debug) { // NOLINT
+					#ifdef _WIN32
+						constexpr auto& suffix = "`\r\n";
+					#else
 						constexpr auto& suffix = "`\n";
+					#endif // _WIN32
 						constexpr auto message_size = N1 - 1;
 						constexpr auto function_size = N2 - 1;
 						// NOLINTNEXTLINE(modernize-avoid-c-arrays)
@@ -82,7 +76,7 @@ namespace cjdb::contracts_detail {
 						std::memcpy(p, message, message_size);
 						std::memcpy(p += message_size, function, function_size);
 						std::memcpy(p += function_size, suffix, sizeof suffix);
-						CJDB_PRINT_ERROR(full_message);
+						::cjdb::print_error(full_message);
 					}
 				}
 			#ifdef _MSC_VER
@@ -108,7 +102,8 @@ namespace cjdb::contracts_detail {
 		}
 	};
 	inline constexpr auto matches_bool = matches_bool_fn{};
-} // namespace cjdb::contracts_detail
+} // namespace contracts_detail
+} // namespace cjdb
 
 #define CJDB_CONTRACT_IMPL(CJDB_KIND, ...) \
    ::cjdb::contracts_detail::contract_impl(::cjdb::contracts_detail::matches_bool(__VA_ARGS__), \
