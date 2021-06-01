@@ -33,7 +33,7 @@
 
 namespace cjdb {
 	using print_error_fn = void(std::string_view);
-	inline print_error_fn *print_error = [](std::string_view message) {
+	inline print_error_fn* print_error = [](std::string_view message) {
 #ifdef CJDB_USE_IOSTREAM
 		std::cerr.write(message.data(), static_cast<std::streamsize>(message.size()));
 #elif !defined(CJDB_SKIP_STDIO)
@@ -60,11 +60,11 @@ namespace contracts_detail {
 			if (not result) {
 				if (not std::is_constant_evaluated()) {
 					if constexpr (is_debug) {
-	#ifdef _WIN32
+					#ifdef _WIN32
 						constexpr auto& suffix = "`\r\n";
-	#else
+					#else
 						constexpr auto& suffix = "`\n";
-	#endif // _WIN32
+					#endif // _WIN32
 						::cjdb::print_error(message);
 						::cjdb::print_error(function);
 						::cjdb::print_error(suffix);
