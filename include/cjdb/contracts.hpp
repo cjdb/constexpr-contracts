@@ -32,7 +32,8 @@
 #endif // _MSC_VER
 
 namespace cjdb {
-	void(*print_error)(std::string_view)
+	using print_error_fn = void(std::string_view);
+	inline print_error_fn *print_error
 #ifndef CJDB_SKIP_STDIO
 	= [](std::string_view message) {
 #ifdef CJDB_USE_IOSTREAM
