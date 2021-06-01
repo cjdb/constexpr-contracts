@@ -35,7 +35,7 @@
 
 namespace cjdb {
 	using print_error_fn = void(std::string_view);
-	inline print_error_fn *print_error = [](std::string_view message) {
+	inline print_error_fn* print_error = [](std::string_view message) {
 #ifdef CJDB_USE_IOSTREAM
 		std::cerr.write(message.data(), static_cast<std::streamsize>(message.size()));
 #elif !defined(CJDB_SKIP_STDIO)
