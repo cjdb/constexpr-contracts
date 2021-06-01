@@ -75,7 +75,7 @@ namespace contracts_detail {
 						auto p = full_message;
 						std::memcpy(p, message, message_size);
 						std::memcpy(p += message_size, function, function_size);
-						std::memcpy(p += function_size, suffix, sizeof suffix);
+						std::memcpy(p += function_size, suffix, sizeof suffix - 1);
 						::cjdb::print_error(full_message);
 					}
 				}
