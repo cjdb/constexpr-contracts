@@ -59,8 +59,8 @@ contracts are always checked at compile-time. If the contract's predicate isn't 
 program won't compile. This is a huge advantage over using `<cassert>` or the GSL's `Expects` and
 `Ensures` macros.
 
-When optimisations are diabled and `NDEBUG` is not defined as a macro, the contract will check your
-predicate at run-time. If the predicate fails, then a diagnostic will be emit, and the program will
+When optimisations are disabled and `NDEBUG` is not defined as a macro, the contract will check your
+predicate at run-time. If the predicate fails, then a diagnostic will be emitted, and the program will
 crash.
 
 When optimisations are enabled, and `NDEBUG` remains undefined, the program will emit a diagnostic
@@ -196,7 +196,11 @@ generation than when the contract isn't used. [See for yourself][__builtin_unrea
 </table>
 
 *Rudimentary testing has identified that neither GCC nor Clang perform optimisations <em>before</em>
-the contract.
+the contract.*
+
+### Configuring diagnostics
+
+By default, diagnostic messages are printed to `stderr` by `std::fwrite`. If `CJDB_USE_IOSTREAM` is defined as a macro, messages are printed with `std::cerr.write` instead. If `CJDB_SKIP_STDIO` is defined as a macro, there is no dependency on either `cstdio` or `iostream` and printing diagnostic messages is a no-op. If you would like to customize how diagnostics are printed, you may set the function pointer `cjdb::print_error` to any function or lambda with the signature `void(std::string_view)`.
 
 ### Assertions
 
