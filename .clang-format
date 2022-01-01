@@ -4,8 +4,9 @@
 Language: Cpp
 Standard: Latest
 
-AccessModifierOffset: -3
+AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
+AlignArrayOfStructures: Right
 AlignConsecutiveAssignments: None
 AlignConsecutiveBitFields: None
 AlignConsecutiveDeclarations: None
@@ -60,7 +61,7 @@ ColumnLimit: 120
 CompactNamespaces: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 0
-ContinuationIndentWidth: 3
+ContinuationIndentWidth: 2
 Cpp11BracedListStyle: true
 DeriveLineEnding: false
 DerivePointerAlignment: false
@@ -76,13 +77,15 @@ IndentExternBlock: true
 IndentGotoLabels: false
 IndentPPDirectives: AfterHash
 IndentRequires: false
-IndentWidth: 3
+IndentWidth: 2
 IndentWrappedFunctionNames: false
 InsertTrailingCommas: Wrapped
 KeepEmptyLinesAtTheStartOfBlocks: false
+LambdaBodyIndentation: Signature
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: All
 NamespaceMacros: []
+PackConstructorInitializers: Never
 PenaltyBreakAssignment: 10
 PenaltyBreakBeforeFirstCallParameter: 10
 PenaltyBreakComment: 10
@@ -93,8 +96,11 @@ PenaltyExcessCharacter: 10
 PenaltyIndentedWhitespace: 10
 PenaltyReturnTypeOnItsOwnLine: 10
 PointerAlignment: Left
+PPIndentWidth: 2
 RawStringFormats: []
 ReflowComments: true
+QualifierAlignment: Custom
+QualifierOrder: ['static', 'inline', 'constexpr', 'type', 'const', 'volatile', 'restrict']
 ShortNamespaceLines: 1
 SortIncludes: true
 SortUsingDeclarations: true
@@ -119,7 +125,7 @@ SpacesInConditionalStatement: false
 SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-TabWidth: 3
+TabWidth: 2
 TypenameMacros: []
 UseCRLF: false
 UseTab: ForIndentation

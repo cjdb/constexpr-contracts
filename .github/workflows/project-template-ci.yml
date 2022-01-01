@@ -23,37 +23,27 @@ jobs:
           sudo apt-get update
           sudo apt-get remove -y .*clang.* .*llvm.*
           sudo apt-get autoremove -y
-          sudo apt-get install -y \
-            clang-format-13       \
-            clang-tidy-13         \
-            clang-tools-13        \
-            clang-13              \
-            libc++-13-dev         \
-            libc++1-13            \
-            libc++abi-13-dev      \
-            libc++abi1-13         \
-            libclang-13-dev       \
-            libclang1-13          \
-            lld-13                \
-            llvm-13-dev           \
-            llvm-13-runtime       \
-            llvm-13               \
-            python3-clang-13      \
-            cmake                 \
-            gcc-11                \
-            g++-11                \
-            ninja-build
+          sudo apt-get install -y  \
+            clang                  \
+            clang-format           \
+            clang-tidy             \
+            clang-tools            \
+            cmake                  \
+            g++-11                 \
+            gcc-11                 \
+            libc++-14-dev          \
+            libc++abi-14-dev       \
+            libclang-14-dev        \
+            libclang-common-14-dev \
+            libfuzzer-14-dev       \
+            libunwind-14-dev       \
+            lld                    \
+            llvm-dev               \
+            ninja-build            \
+            python3-clang
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100
-          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-13 100
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-13 100
-          sudo update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-13 100
-          sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-13 100
-          sudo update-alternatives --install /usr/bin/git-clang-format git-clang-format /usr/bin/git-clang-format-13 100
-          sudo update-alternatives --install /usr/bin/llvm-ar llvm-ar /usr/bin/llvm-ar-13 100
-          sudo update-alternatives --install /usr/bin/llvm-as llvm-as /usr/bin/llvm-as-13 100
-          sudo update-alternatives --install /usr/bin/llvm-rc llvm-rc /usr/bin/llvm-rc-13 100
-          sudo update-alternatives --install /usr/bin/llvm-ranlib llvm-ranlib /usr/bin/llvm-ranlib-13 100
+          clang --version
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -62,7 +52,7 @@ jobs:
 
       - name: Formatting
         id: git_clang_format
-        run: git-clang-format-13
+        run: git-clang-format
           --style=file
           --extensions c,cc,cpp,cxx,h,hh,hpp,hxx
           --diff origin/main HEAD
@@ -77,13 +67,18 @@ jobs:
 
       - name: Configure
         id: configure
-        run: cmake . -GNinja
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -DCMAKE_TOOLCHAIN_FILE=`pwd`/vcpkg/scripts/buildsystems/vcpkg.cmake
-          -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=`pwd`/config/cmake/toolchains/${{ matrix.toolchain }}.cmake
-          -DVCPKG_TARGET_TRIPLET=${{ matrix.toolchain }}
-          -DTODO_RENAME_ME_ENABLE_CLANG_TIDY=${{ matrix.clang_tidy }}
-          -DTODO_RENAME_ME_CLANG_TIDY_PATH=${{ matrix.clang_tidy_path }}
+        run: |
+          export ENABLE_CLANG_TIDY=On
+          if [[ ${{ matrix.toolchain }} == "gcc_libstdcxx" && ${{ matrix.build_type }} == "Release" ]]; then
+            export ENABLE_CLANG_TIDY=Off
+          fi
+          cmake . -G Ninja                                                                               \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}                                                  \
+            -DCMAKE_TOOLCHAIN_FILE=`pwd`/vcpkg/scripts/buildsystems/vcpkg.cmake                          \
+            -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=`pwd`/config/cmake/toolchains/${{ matrix.toolchain }}.cmake \
+            -DVCPKG_TARGET_TRIPLET=${{ matrix.toolchain }}                                               \
+            -DTODO_RENAME_ME_ENABLE_CLANG_TIDY=${ENABLE_CLANG_TIDY}                                      \
+            -DTODO_RENAME_ME_CLANG_TIDY_PATH=${{ matrix.clang_tidy_path }}
 
       - name: Build
         id: build

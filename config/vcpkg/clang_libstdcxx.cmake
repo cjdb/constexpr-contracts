@@ -19,9 +19,7 @@ set(VCPKG_LIBRARY_LINKAGE static)
 
 set(VCPKG_CMAKE_SYSTEM_NAME Linux)
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
-
-set(CMAKE_C_COMPILER "clang++")
+set(CMAKE_C_COMPILER "clang")
 set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_AR "llvm-ar")
 set(CMAKE_RC_COMPILER "llvm-rc")
@@ -30,6 +28,7 @@ set(CMAKE_RANLIB "llvm-ranlib")
 string(
    JOIN " " CMAKE_CXX_FLAGS
    "${CMAKE_CXX_FLAGS}"
+   -stdlib=libstdc++
    -fvisibility=hidden
    -fstack-protector
    -fdiagnostics-color=always
@@ -66,12 +65,14 @@ string(
    "${CMAKE_CXX_FLAGS_RELEASE}"
    -fsanitize=cfi
    -fno-sanitize=cfi-unrelated-cast # TODO(cjdb): remove once Catch2 properly supports cfi
-   -fmarch=x86-64-v4
+   -march=x86-64-v4
    -ffast-math
+   -flto=thin
 )
 
 string(
    JOIN " " CMAKE_EXE_LINKER_FLAGS
    "${CMAKE_EXE_LINKER_FLAGS}"
    -fuse-ld=lld
+   -flto=thin
 )
