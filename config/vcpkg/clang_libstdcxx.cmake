@@ -32,25 +32,6 @@ string(
    -fvisibility=hidden
    -fstack-protector
    -fdiagnostics-color=always
-   -pedantic
-   -Werror
-   -Wall
-   -Wextra
-   -Wcast-align
-   -Wconversion
-   -Wdouble-promotion
-   -Wnon-virtual-dtor
-   -Wold-style-cast
-   -Woverloaded-virtual
-   -Wshadow
-   -Wsign-conversion
-   -Wsign-promo
-   -Wunused
-   -Wformat=2
-   -Wodr
-   -Wno-attributes
-   -Wnull-dereference
-   -Wno-unused-command-line-argument
 )
 
 string(

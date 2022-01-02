@@ -23,6 +23,13 @@ set(CMAKE_AR "ar")
 set(CMAKE_RANLIB "ranlib")
 
 string(
+  JOIN " " CMAKE_C_FLAGS_RELEASE
+  "${CMAKE_C_FLAGS_RELEASE}"
+  -mavx2
+  -fuse-ld=gold
+)
+
+string(
    JOIN " " CMAKE_EXE_LINKER_FLAGS
    "${CMAKE_EXE_LINKER_FLAGS}"
    -fuse-ld=gold

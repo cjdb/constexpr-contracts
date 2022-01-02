@@ -27,25 +27,6 @@ string(
    -fvisibility=hidden
    -fstack-protector
    -fdiagnostics-color=always
-   -pedantic
-   -Werror
-   -Wall
-   -Wextra
-   -Wcast-align
-   -Wconversion
-   -Wdouble-promotion
-   -Wnon-virtual-dtor
-   -Wold-style-cast
-   -Woverloaded-virtual
-   -Wshadow
-   -Wsign-conversion
-   -Wsign-promo
-   -Wunused
-   -Wformat=2
-   -Wodr
-   -Wno-attributes
-   -Wnull-dereference
-   -Wno-unused-command-line-argument
 )
 
 string(
@@ -56,7 +37,7 @@ string(
 )
 
 set(CMAKE_CXX_COMPILER "g++")
-set(PROJECT_TEMPLATE_CXX_COMPILER_MINIMUM_VERSION 10)
+set(PROJECT_TEMPLATE_CXX_COMPILER_MINIMUM_VERSION 11)
 
 set(CMAKE_AR "ar")
 set(CMAKE_RANLIB "ranlib")
