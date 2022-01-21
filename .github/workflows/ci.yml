@@ -21,7 +21,7 @@ jobs:
           sudo wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
           sudo apt-add-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal main'
           sudo apt-get update
-          sudo apt-get remove -y .*clang.* .*llvm.*
+          sudo apt-get remove -y .*clang.* .*llvm.* .*gcc.*
           sudo apt-get autoremove -y
           sudo apt-get install -y  \
             clang                  \
@@ -57,28 +57,14 @@ jobs:
           --extensions c,cc,cpp,cxx,h,hh,hpp,hxx
           --diff origin/main HEAD
 
-      - name: Install external libraries
-        id: install_vcpkg
-        run: |
-          git clone https://github.com/Microsoft/vcpkg.git
-          cp config/vcpkg/${{ matrix.toolchain }}.cmake vcpkg/triplets/community/.
-          cd vcpkg
-          ./bootstrap-vcpkg.sh -disableMetrics -useSystemBinaries
-
       - name: Configure
         id: configure
         run: |
-          export ENABLE_CLANG_TIDY=On
-          if [[ ${{ matrix.toolchain }} == "gcc_libstdcxx" && ${{ matrix.build_type }} == "Release" ]]; then
-            export ENABLE_CLANG_TIDY=Off
-          fi
-          cmake . -G Ninja                                                                               \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}                                                  \
-            -DCMAKE_TOOLCHAIN_FILE=`pwd`/vcpkg/scripts/buildsystems/vcpkg.cmake                          \
-            -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=`pwd`/config/cmake/toolchains/${{ matrix.toolchain }}.cmake \
-            -DVCPKG_TARGET_TRIPLET=${{ matrix.toolchain }}                                               \
-            -DTODO_RENAME_ME_ENABLE_CLANG_TIDY=${ENABLE_CLANG_TIDY}                                      \
-            -DTODO_RENAME_ME_CLANG_TIDY_PATH=${{ matrix.clang_tidy_path }}
+          cmake . -G Ninja                                                                     \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}                                        \
+            -DCMAKE_TOOLCHAIN_FILE=`pwd`/config/cmake/toolchains/${{ matrix.toolchain }}.cmake \
+            -DCONSTEXPR_CONTRACTS_ENABLE_CLANG_TIDY=On                                         \
+            -DCONSTEXPR_CONTRACTS_CLANG_TIDY_PATH=${{ matrix.clang_tidy_path }}
 
       - name: Build
         id: build

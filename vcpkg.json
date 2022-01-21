@@ -1,9 +1,7 @@
 {
-    "name": "project-template",
-    "version-string": "LIVE_AT_HEAD",
-    "homepage": "https://github.com/cjdb/project_template.git",
-    "description": "A new project template",
-    "dependencies": [
-        "catch2"
-    ]
+  "name": "project-template",
+  "version-string": "LIVE_AT_HEAD",
+  "homepage": "https://github.com/cjdb/constexpr-contracts.git",
+  "description": "A constexpr-friendly, optimisation-friendly contracts library.",
+  "dependencies": []
 }
