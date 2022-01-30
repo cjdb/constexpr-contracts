@@ -19,10 +19,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/config/cmake")
 # Project configuration
 # Build
 
-target_include_directories(constexpr-contracts INTERFACE
-   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-   $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
-
 enable_testing()
 include(CTest)
 
@@ -42,6 +38,8 @@ add_subdirectory(test)
 # Install
 
 include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+
 install(TARGETS constexpr-contracts
         EXPORT  constexpr-contracts
         DESTINATION lib)

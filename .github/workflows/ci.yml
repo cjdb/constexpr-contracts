@@ -11,7 +11,7 @@ jobs:
       matrix:
         os: [ubuntu-20.04]
         build_type: [Debug, Release]
-        toolchain: [gcc_libstdcxx, clang_libstdcxx, clang_libcxx]
+        toolchain: [gcc_libstdcxx, clang_libcxx]
         clang_tidy: [On]
         clang_tidy_path: [/usr/bin/clang-tidy]
     steps:

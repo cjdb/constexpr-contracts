@@ -80,12 +80,13 @@ function(cxx_library)
 	endif()
 
 	add_library("${add_target_args_TARGET}" ${add_target_args_LIBRARY_TYPE} "${add_target_args_FILENAME}" "${add_target_args_FILENAMES}")
-	target_include_directories("${add_target_args_TARGET}" PUBLIC "${PROJECT_SOURCE_DIR}/include")
+	target_include_directories(
+	  "${add_target_args_TARGET}" PUBLIC
+	  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+	  $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
 
 	target_compile_definitions("${add_target_args_TARGET}" PRIVATE "${add_target_args_DEFINITIONS}")
-	target_compile_definitions("${add_target_args_TARGET}" PUBLIC "${add_target_args_DEFINE_AND_EXPORT}")
 	target_include_directories("${add_target_args_TARGET}" PRIVATE "${add_target_args_INCLUDE}")
-	target_include_directories("${add_target_args_TARGET}" PUBLIC "${add_target_args_INCLUDE_AND_EXPORT}")
 	target_compile_options("${add_target_args_TARGET}" PRIVATE "${add_target_args_COMPILE_OPTIONS}")
 	target_link_options("${add_target_args_TARGET}" PRIVATE "${add_target_args_LINK_OPTIONS}")
 	target_link_libraries("${add_target_args_TARGET}" PRIVATE "${add_target_args_LINK_TARGETS}")
