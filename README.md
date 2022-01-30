@@ -10,23 +10,22 @@ offer a consolation library, which emulates how I'd like contracts to behave.
 ## Prerequisites
 
 1. CMake 3.17 or later
-2. A compiler that supports `consteval` in C++20-mode.
-3. A standard library that supports `std::is_constant_evaluated` in C++20-mode.
+2. GCC with libstdc++ or Clang 14 with libc++
 
 ## Installation
 
-### Without vcpkg
-
-FIXME
-
 ### With vcpkg
 
-FIXME
+Simply add `constexpr-contracts` to your vcpkg manifest file.
 
 #### Linking in CMake
 
-To link in CMake, you'll need to use `find_package(constexpr-contracts REQUIRED)` to import the library.
-To link against the library, use `target_link_libraries(target PRIVATE cjdb::constexpr-contracts)`.
+To link using CMake, you'll need to use `find_package(constexpr-contracts REQUIRED)` to import the
+library. To link against the library, use `target_link_libraries(target PRIVATE cjdb::constexpr-contracts)`.
+
+To maximise user-experience, you should ensure that your `CMAKE_CXX_FLAGS` doesn't set symbol
+visibility to anything other than the default (you should instead defer this to
+`CMAKE_CXX_RELEASE_FLAGS`). `CMAKE_EXE_LINKER_FLAGS` should set `-rdynamic`.
 
 ## Usage
 
@@ -207,20 +206,40 @@ somewhere.
 ```cpp
 // file: example1.cpp
 #include <cjdb/contracts.hpp>
-#include <concepts>
 
-int main()
+namespace assert {
+	void f(int const argc) noexcept
+	{
+		CJDB_ASSERT(argc > 1);
+	}
+} // namespace assert
+
+void g(int const argc) noexcept
 {
-	std::integral auto x = f();
-	CJDB_ASSERT(x != 0);
-	std::cout << (5 / x) << '\n';
+	assert::f(argc);
 }
+
+int main(int argc, char**)
+{
+	g(argc);
+	constexpr auto return_code = 255;
+	return argc == 1 ? 0 : return_code;
+}
+
 ```
 
 The above program will behave as if the assertion is not present in the event `x != 0`. If, however,
 `x == 0`, the program will print the following message in debug-mode and then crash.
 ```
-./example.cpp:8: assertion `x != 0` failed in `int main()`
+---------------------------------------- Contract report ----------------------------------------
+An assumption of 'void assert::f(const int)' is that 'argc > 1', but we provided '1'
+
+------------------------------------------ Stack trace ------------------------------------------
+  ./test/fail-assert:	assert::f(int)
+  ./test/fail-assert:	g(int)
+  ./test/fail-assert:	main
+  /lib/x86_64-linux-gnu/libc.so.6:	__libc_start_main
+  ./test/fail-assert:	_start
 ```
 
 In this case, nothing is different with `-O3 -DNDEBUG`, but [take a look][unreachable-2] at what
@@ -264,8 +283,27 @@ before we initialise `age_`, so that we know that the expectation is met before 
 to use it. The run-time diagnostic we get is:
 
 ```
-./example2.cpp:10: pre-condition `age >= 0` failed in `person::person(std::string_view, std::string_view, int)`
+---------------------------------------- Contract report ----------------------------------------
+A precondition of 'person::person(std::string_view, std::string_view, int)' is that 'age >= 0',
+but we provided '-1'
+
+------------------------------------------ Stack trace ------------------------------------------
+  ./test/fail-expects:	person::person(std::__1::basic_string_view<char, std::__1::char_traits<char> >, std::__1::basic_string_view<char, std::__1::char_traits<char> >, int)
+  ./test/fail-expects:	[0x3209a3]
+  ./test/fail-expects:	[0x320a68]
+  ./test/fail-expects:	__libc_csu_init
 ```
+
+#### Why do `[0x3209a3]` and `[0x320a68]` appear?
+
+Those are the symbol names in memory, and represent a context that the run-time can't retrieve. The
+two known reasons why this can happen are:
+
+1. You're checking something in a global declaration.
+2. You've built with something like `-fvisibility=hidden` or you're not building with `-Wl,-rdynamic`.
+
+Support will eventually appear for reading debugging symbols, which will allow you to pinpoint the
+path and line numbers for each symbol.
 
 ### Post-conditions
 

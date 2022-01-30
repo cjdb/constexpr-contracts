@@ -23,7 +23,6 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 string(
    JOIN " " CMAKE_CXX_FLAGS
    "${CMAKE_CXX_FLAGS}"
-   -fvisibility=hidden
    -fstack-protector
    -fdiagnostics-color=always
    -pedantic
@@ -48,8 +47,14 @@ string(
 )
 
 string(
-   JOIN " " CMAKE_CXX_FLAGS_DEBUG
-   "${CMAKE_CXX_FLAGS_DEBUG}"
+   JOIN " " CONSTEXPR_CONTRACTS_FLAGS_DEBUG
+   "${CONSTEXPR_CONTRACTS_FLAGS_DEBUG}"
    -fsanitize=address,undefined
    -fstack-protector-strong
+)
+
+string(
+   JOIN " " CONSTEXPR_CONTRACTS_FLAGS_RELEASE
+   "${CONSTEXPR_CONTRACTS_FLAGS_RELEASE}"
+   -fvisibility=hidden
 )

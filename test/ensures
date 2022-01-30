@@ -1,0 +1,9 @@
+---------------------------------------- Contract report ----------------------------------------
+A postcondition of 'int ensures::magic(int)' is that 'x > 1', but we provided '1'
+
+------------------------------------------ Stack trace ------------------------------------------
+  ./test/fail-ensures:	ensures::magic(int)
+  ./test/fail-ensures:	magic2(int)
+  ./test/fail-ensures:	main
+  /lib/x86_64-linux-gnu/libc.so.6:	__libc_start_main
+  ./test/fail-ensures:	_start

@@ -17,12 +17,15 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/config/cmake")
 
 # Project configuration
+string(JOIN " " CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}" "${CONSTEXPR_CONTRACTS_FLAGS_DEBUG}")
+string(JOIN " " CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}" "${CONSTEXPR_CONTRACTS_FLAGS_RELEASE}")
+
 # Build
 
 enable_testing()
 include(CTest)
 
-option(${PROJECT_NAME}_ENABLE_CLANG_TIDY "Builds with clang-tidy, if available. Defaults to On." On)
+option(${PROJECT_NAME}_ENABLE_CLANG_TIDY "Builds with clang-tidy, if available. Defaults to Off." Off)
 set(${PROJECT_NAME}_CLANG_TIDY_PATH "/usr/bin/clang-tidy" CACHE FILEPATH "Path to clang-tidy. Defaults to /usr/bin/clang-tidy")
 if(${PROJECT_NAME}_ENABLE_CLANG_TIDY)
 	find_package(ClangTidy REQUIRED)
@@ -40,10 +43,10 @@ add_subdirectory(test)
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
-install(TARGETS constexpr-contracts
-        EXPORT  constexpr-contracts
+install(TARGETS contracts
+        EXPORT  contracts
         DESTINATION lib)
-install(EXPORT constexpr-contracts
+install(EXPORT contracts
         FILE constexpr-contracts-config.cmake
         NAMESPACE cjdb::
         DESTINATION lib/cmake/constexpr-contracts)

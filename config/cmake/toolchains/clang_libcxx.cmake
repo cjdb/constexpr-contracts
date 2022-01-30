@@ -26,18 +26,22 @@ set(CMAKE_RANLIB "llvm-ranlib")
 string(
    JOIN " " CMAKE_CXX_FLAGS
    "${CMAKE_CXX_FLAGS}"
+   -unwindlib=libunwind
+   -rtlib=compiler-rt
    -stdlib=libc++
+   -static-libgcc
 )
 
-string(
-   JOIN " " CMAKE_CXX_FLAGS_RELEASE
-   "${CMAKE_CXX_FLAGS_RELEASE}"
+set(
+   JOIN " " CONSTEXPR_CONTRACTS_FLAGS_RELEASE
+   "${CONSTEXPR_CONTRACTS_FLAGS_RELEASE}"
    -fsanitize=cfi
-   -fno-sanitize=cfi-unrelated-cast # TODO(cjdb): remove once Catch2 properly supports cfi
+   -fno-sanitize=cfi-unrelated-cast
 )
 
 string(
    JOIN " " CMAKE_EXE_LINKER_FLAGS
    "${CMAKE_EXE_LINKER_FLAGS}"
    -fuse-ld=lld
+   -rdynamic
 )

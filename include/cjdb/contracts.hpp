@@ -1,91 +1,208 @@
-//
-//  Copyright Christopher Di Bella
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Copyright (c) Christopher Di Bella.
+// Copyright (c) Casey Carter.
+// Copyright (c) Eric Niebler.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 #ifndef CJDB_CONTRACTS_HPP
 #define CJDB_CONTRACTS_HPP
 
-#include <cstdio>
 #include <string_view>
 #include <type_traits>
+namespace cjdb::constexpr_contracts_detail {
+	void print_stacktrace() noexcept;
 
-// clang-tidy doesn't yet support this
-//
-// #ifndef __cpp_lib_is_constant_evaluated
-// #  error "Contracts Consolation requires a compiler supporting std::is_constant_evaluated."
-// #endif // __cpp_lib_is_constant_evaluated
+	void print_contract_violation(signed char value) noexcept;
+	void print_contract_violation(unsigned char value) noexcept;
+	void print_contract_violation(short value) noexcept;
+	void print_contract_violation(unsigned short value) noexcept;
+	void print_contract_violation(int value) noexcept;
+	void print_contract_violation(unsigned int value) noexcept;
+	void print_contract_violation(long value) noexcept;
+	void print_contract_violation(unsigned long value) noexcept;
+	void print_contract_violation(long long value) noexcept;
+	void print_contract_violation(unsigned long long value) noexcept;
+	void print_contract_violation(float value) noexcept;
+	void print_contract_violation(double value) noexcept;
+	void print_contract_violation(long double value) noexcept;
+	void print_contract_violation(bool value) noexcept;
+	void print_contract_violation(char value) noexcept;
+	void print_contract_violation(char const* value) noexcept;
+	void print_contract_violation(wchar_t value) noexcept;
+	void print_contract_violation(wchar_t const* value) noexcept;
+	void print_contract_violation(char8_t value) noexcept;
+	void print_contract_violation(char16_t value) noexcept;
+	void print_contract_violation(char32_t value) noexcept;
+	void print_contract_violation(void const* value) noexcept;
+	void print_contract_violation(std::string_view value) noexcept;
+	void print_contract_violation() noexcept;
+	void print_contract_violation_hex(unsigned char value) noexcept;
+	void
+	print_contract_violation_header(char const* contract_type, char const* function_name, char const* expected) noexcept;
 
-#define CJDB_EXPECTS(...) CJDB_CONTRACT_IMPL("pre-condition", __VA_ARGS__)
-#define CJDB_ASSERT(...)  CJDB_CONTRACT_IMPL("assertion", __VA_ARGS__)
-#define CJDB_ENSURES(...) CJDB_CONTRACT_IMPL("post-condition", __VA_ARGS__)
+	enum class contract_kind { expects, ensures, assume };
 
-#ifdef _MSC_VER
-	#define CJDB_PRETTY_FUNCTION __FUNCSIG__
-#else
-	#define CJDB_PRETTY_FUNCTION __PRETTY_FUNCTION__
-#endif // _MSC_VER
+	template<class T, contract_kind Kind>
+	class contract_impl {
+	public:
+		constexpr contract_impl(char const* const function, char const* const expected, T&& actual) noexcept
+		: function_(function)
+		, expected_(expected)
+		, value_(static_cast<T&&>(actual))
+		{}
 
-namespace cjdb::contracts_detail {
-	#ifdef NDEBUG
-		inline constexpr auto is_debug = false;
-	#else
-		inline constexpr auto is_debug = true;
-	#endif // NDEBUG
-
-	struct contract_impl_fn {
-		constexpr void operator()(bool const result,
-		                          std::string_view const message,
-		                          std::string_view const function) const noexcept
+		constexpr ~contract_impl() noexcept
 		{
-			if (not result) [[unlikely]] {
-				if (not std::is_constant_evaluated()) {
-					if constexpr (is_debug) {
-						std::fprintf(stderr, "%s in `%s`\n", message.data(), function.data());
-					}
-				}
-			#ifdef _MSC_VER
-				__assume(false);
-			#elif defined(__OPTIMIZE__)
-				__builtin_unreachable();
-			#else
-				__builtin_trap();
-			#endif // __OPTIMIZE__
+			if (not dismissed_ and eval()) {
+				constexpr auto meaningless_number = 42;
+				handle_violation(meaningless_number);
 			}
 		}
-	};
-	inline constexpr auto contract_impl = contract_impl_fn{};
 
-	// This function doesn't use std::same_as, since the library is used by cjdb-ranges, which is
-	// an implementation of standard concepts.
-	struct matches_bool_fn {
-		template<typename T>
-		requires std::is_same_v<std::remove_cvref_t<T>, bool>
-		constexpr bool operator()(T const t) const noexcept
+		contract_impl(contract_impl const&) = delete;
+		contract_impl& operator=(contract_impl const&) = delete;
+
+		constexpr void operator==(auto const& u) noexcept
 		{
-			return t;
+			dismissed_ = true;
+			if (not (value_ == u)) [[unlikely]] {
+				handle_violation(u);
+			}
+		}
+
+		constexpr void operator!=(auto const& u) noexcept
+		{
+			dismissed_ = true;
+			if (not (value_ != u)) [[unlikely]] {
+				handle_violation(u);
+			}
+		}
+
+		constexpr void operator<(auto const& u) noexcept
+		{
+			dismissed_ = true;
+			if (not (value_ < u)) [[unlikely]] {
+				handle_violation(u);
+			}
+		}
+
+		constexpr void operator>(auto const& u) noexcept
+		{
+			dismissed_ = true;
+			if (not (value_ > u)) [[unlikely]] {
+				handle_violation(u);
+			}
+		}
+
+		constexpr void operator<=(auto const& u) noexcept
+		{
+			dismissed_ = true;
+			if (not (value_ <= u)) [[unlikely]] {
+				handle_violation(u);
+			}
+		}
+
+		constexpr void operator>=(auto const& u) noexcept
+		{
+			dismissed_ = true;
+			if (not (value_ >= u)) [[unlikely]] {
+				handle_violation(u);
+			}
+		}
+
+		constexpr void operator<=>(auto const& u) noexcept
+		{
+			dismissed_ = true;
+			if (not (value_ <=> u)) [[unlikely]] {
+				handle_violation(u);
+			}
+		}
+	private:
+		char const* function_;
+		char const* expected_;
+		T value_;
+		bool dismissed_ = false;
+
+		template<class U>
+		[[noreturn]] constexpr void handle_violation(U const&) const noexcept
+		{
+			if (not std::is_constant_evaluated()) {
+				report_failure(function_, expected_, value_);
+			}
+
+#if _MSC_VER
+			__assume(0);
+#elif defined(__OPTIMIZE__)
+			__builtin_unreachable();
+#else
+			__builtin_trap();
+#endif
+		}
+
+		constexpr auto eval() noexcept
+		{
+			if constexpr (requires { not value_; }) {
+				return not static_cast<bool>(value_);
+			}
+			else {
+				return true;
+			}
+		}
+
+		static void report_failure(
+		  [[maybe_unused]] char const* const function_name,
+		  [[maybe_unused]] char const* const expected,
+		  [[maybe_unused]] T const& actual) noexcept
+		{
+#if not defined(NDEBUG) // or defined(CJDB_CONTRACTS_ALWAYS_REPORT)
+			print_contract_violation_header(contract_type(), function_name, expected);
+			print_contract_violation(actual);
+			print_stacktrace();
+#endif
+		}
+
+		static constexpr char const* contract_type() noexcept
+		{
+			return Kind == contract_kind::expects ? "A precondition"
+			     : Kind == contract_kind::ensures ? "A postcondition"
+			     : Kind == contract_kind::assume
+			       ? "An assumption"
+			       : "<internal error: new kind of contract not handled>";
 		}
 	};
-	inline constexpr auto matches_bool = matches_bool_fn{};
-} // namespace cjdb::contracts_detail
 
-#define CJDB_CONTRACT_IMPL(CJDB_KIND, ...) \
-   ::cjdb::contracts_detail::contract_impl(::cjdb::contracts_detail::matches_bool(__VA_ARGS__), \
-      __FILE__ ":" CJDB_TO_STRING(__LINE__) ": " CJDB_KIND " `" #__VA_ARGS__ "` failed",        \
-      CJDB_PRETTY_FUNCTION)
+	template<contract_kind Kind>
+	class contract {
+	public:
+		constexpr contract(char const* const function, char const* const expected) noexcept
+		: function_(function)
+		, expected_(expected)
+		{}
 
+		template<class T>
+		constexpr contract_impl<T, Kind> operator->*(T&& t) noexcept
+		{
+			return {function_, expected_, static_cast<T&&>(t)};
+		}
+	private:
+		char const* function_;
+		char const* expected_;
+	};
+} // namespace cjdb::constexpr_contracts_detail
 
-#define CJDB_TO_STRING(CJDB_STRING) CJDB_TO_STRING_IMPL(CJDB_STRING)
-#define CJDB_TO_STRING_IMPL(CJDB_STRING) #CJDB_STRING
+#define CJDB_ASSERT(...)                                                                                      \
+	(void)(cjdb::constexpr_contracts_detail::contract<cjdb::constexpr_contracts_detail::contract_kind::assume>( \
+	         __PRETTY_FUNCTION__,                                                                               \
+	         #__VA_ARGS__)                                                                                      \
+	         ->*__VA_ARGS__)
+#define CJDB_EXPECTS(...)                                                                                      \
+	(void)(cjdb::constexpr_contracts_detail::contract<cjdb::constexpr_contracts_detail::contract_kind::expects>( \
+	         __PRETTY_FUNCTION__,                                                                                \
+	         #__VA_ARGS__)                                                                                       \
+	         ->*__VA_ARGS__)
+#define CJDB_ENSURES(...)                                                                                      \
+	(void)(cjdb::constexpr_contracts_detail::contract<cjdb::constexpr_contracts_detail::contract_kind::ensures>( \
+	         __PRETTY_FUNCTION__,                                                                                \
+	         #__VA_ARGS__)                                                                                       \
+	         ->*__VA_ARGS__)
 
 #endif // CJDB_CONTRACTS_HPP

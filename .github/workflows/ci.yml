@@ -12,7 +12,7 @@ jobs:
         os: [ubuntu-20.04]
         build_type: [Debug, Release]
         toolchain: [gcc_libstdcxx, clang_libcxx]
-        clang_tidy: [On]
+        enable_clang_tidy: [Off]
         clang_tidy_path: [/usr/bin/clang-tidy]
     steps:
       - name: Install tools
@@ -21,7 +21,7 @@ jobs:
           sudo wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
           sudo apt-add-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal main'
           sudo apt-get update
-          sudo apt-get remove -y .*clang.* .*llvm.* .*gcc.*
+          sudo apt-get remove -y .*clang.* .*llvm.*
           sudo apt-get autoremove -y
           sudo apt-get install -y  \
             clang                  \
@@ -59,17 +59,26 @@ jobs:
 
       - name: Configure
         id: configure
-        run: |
-          cmake . -G Ninja                                                                     \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}                                        \
-            -DCMAKE_TOOLCHAIN_FILE=`pwd`/config/cmake/toolchains/${{ matrix.toolchain }}.cmake \
-            -DCONSTEXPR_CONTRACTS_ENABLE_CLANG_TIDY=On                                         \
+        run:
+          cmake -G Ninja -S . -B build
+            -DCMAKE_INSTALL_PREFIX=/tmp/coco
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+            -DCMAKE_TOOLCHAIN_FILE=`pwd`/config/cmake/toolchains/${{ matrix.toolchain }}.cmake
+            -DCONSTEXPR_CONTRACTS_ENABLE_CLANG_TIDY=${{ matrix.enable_clang_tidy }}
             -DCONSTEXPR_CONTRACTS_CLANG_TIDY_PATH=${{ matrix.clang_tidy_path }}
 
       - name: Build
         id: build
-        run: ninja
+        run: ninja -C build -v
 
       - name: Test
         id: test
-        run: ctest -j$(nproc) --output-on-failure
+        run: ctest -j$(nproc) --output-on-failure --test-dir build
+
+      - name: Install
+        id: install
+        run: |
+          ninja -C build install
+          ls /tmp/coco/include/cjdb/contracts.hpp
+          ls /tmp/coco/lib/libcontracts.a
+          ls /tmp/coco/lib/cmake/constexpr-contracts/constexpr-contracts-config.cmake

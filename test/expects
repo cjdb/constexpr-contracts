@@ -1,0 +1,9 @@
+---------------------------------------- Contract report ----------------------------------------
+A precondition of 'void expects::f(int)' is that 'argc != 1', but we provided '1'
+
+------------------------------------------ Stack trace ------------------------------------------
+  ./test/fail-expects:	expects::f(int)
+  ./test/fail-expects:	g(int)
+  ./test/fail-expects:	main
+  /lib/x86_64-linux-gnu/libc.so.6:	__libc_start_main
+  ./test/fail-expects:	_start

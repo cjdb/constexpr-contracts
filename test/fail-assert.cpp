@@ -15,9 +15,21 @@
 //
 #include "cjdb/contracts.hpp"
 
+namespace assert {
+	void f(int const argc) noexcept
+	{
+		CJDB_ASSERT(argc > 1);
+	}
+} // namespace assert
+
+void g(int const argc) noexcept
+{
+	assert::f(argc);
+}
+
 int main(int argc, char**)
 {
-	CJDB_ASSERT(argc > 1);
+	g(argc);
 	constexpr auto return_code = 255;
 	return argc == 1 ? 0 : return_code;
 }

@@ -1,0 +1,9 @@
+---------------------------------------- Contract report ----------------------------------------
+An assumption of 'void assert::f((const )?int)' is that 'argc > 1', but we provided '1'
+
+------------------------------------------ Stack trace ------------------------------------------
+  ./test/fail-assert:	assert::f(int)
+  ./test/fail-assert:	g(int)
+  ./test/fail-assert:	main
+  /lib/x86_64-linux-gnu/libc.so.6:	__libc_start_main
+  ./test/fail-assert:	_start

@@ -17,16 +17,23 @@
 #include <cstdio>
 #include <cstdlib>
 
-int magic(int x) noexcept
+namespace ensures {
+	int magic(int x) noexcept
+	{
+		return CJDB_ENSURES(x > 1), x * 2;
+	}
+} // namespace ensures
+
+int magic2(int x) noexcept
 {
-	return CJDB_ENSURES(x > 1), x * 2;
+	return ensures::magic(x);
 }
 
 int main(int const argc, char**)
 {
-	auto const x = magic(argc);
+	auto const x = magic2(argc);
 	if (x == 2) {
-		std::fprintf(stderr, "This should never be printed.\n");
+		(void)std::fprintf(stderr, "This should never be printed.\n");
 		std::exit(1);
 	}
 

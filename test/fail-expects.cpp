@@ -17,11 +17,23 @@
 #include <cstdio>
 #include <cstdlib>
 
+namespace expects {
+	void f(int argc)
+	{
+		CJDB_EXPECTS(argc != 1);
+	}
+} // namespace expects
+
+void g(int argc)
+{
+	expects::f(argc);
+}
+
 int main(int argc, char**)
 {
-	CJDB_EXPECTS(argc != 1);
+	g(argc);
 	if (argc == 1) {
-		std::fprintf(stderr, "This should never be printed.\n");
+		(void)std::fprintf(stderr, "This should never be printed.\n");
 		std::exit(1);
 	}
 

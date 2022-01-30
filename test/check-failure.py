@@ -18,10 +18,18 @@ import subprocess
 import sys
 import argparse
 import re
+import os
+
 
 def abort(process, message):
 	print(f"Error: {process} {message}", file=sys.stderr)
 	sys.exit(1)
+
+
+def dump(name, data):
+	with open(f'/tmp/{name}', 'w') as f:
+		f.write(data)
+
 
 def check_program(args):
 	process = f"./test/{args.process_name}"
@@ -34,7 +42,7 @@ def check_program(args):
 		abort(process, "should not be writing to stdout.")
 
 	if process_results.stderr and not args.debug:
-		abort(process, "wrote to stderr when building in a release mode.")
+		abort(process, f"wrote to stderr when building in a release mode:\n\n{process_results.stderr.decode()}\n")
 
 	expected_result = 255
 	if not args.debug and process_results.returncode != expected_result:
@@ -45,9 +53,13 @@ def check_program(args):
 			abort(process, "did not write to stderr while debugging symbols are present.")
 
 		actual_output = process_results.stderr.decode()
-		match_result = re.match(args.expected_output, actual_output)
-		if match_result:
-			abort(process, f"\n\nexpected: {args.expected_output}\nactual:   {actual_output}")
+		with open(args.expected_output, 'r') as f:
+			expected_output = f.read()
+			if re.match(expected_output, actual_output):
+				dump(f'expected.{os.getpid()}', expected_output)
+				dump(f'actual.{os.getpid()}', actual_output)
+				subprocess.run(['diff', f'/tmp/expected.{os.getpid()}', f'/tmp/actual.{os.getpid()}'])
+				abort(process, f'\n\nexpected output does not match actual output')
 
 
 def parse_args():
