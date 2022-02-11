@@ -84,6 +84,10 @@ function(cxx_library)
 	  "${add_target_args_TARGET}" PUBLIC
 	  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 	  $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
+  target_include_directories(
+      "${add_target_args_TARGET}" SYSTEM PUBLIC
+      $<BUILD_INTERFACE:${add_target_args_INCLUDE_AND_EXPORT}>
+      $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${add_target_args_INCLUDE_AND_EXPORT}>)
 
 	target_compile_definitions("${add_target_args_TARGET}" PRIVATE "${add_target_args_DEFINITIONS}")
 	target_include_directories("${add_target_args_TARGET}" PRIVATE "${add_target_args_INCLUDE}")

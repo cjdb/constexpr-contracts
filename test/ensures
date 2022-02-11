@@ -1,9 +1,9 @@
 ---------------------------------------- Contract report ----------------------------------------
-A postcondition of 'int ensures::magic(int)' is that 'x > 1', but we provided '1'
+A postcondition of 'int ensures::magic\(int\)' is that 'argc % %', but we provided '1'
 
 ------------------------------------------ Stack trace ------------------------------------------
-  ./test/fail-ensures:	ensures::magic(int)
-  ./test/fail-ensures:	magic2(int)
-  ./test/fail-ensures:	main
-  /lib/x86_64-linux-gnu/libc.so.6:	__libc_start_main
-  ./test/fail-ensures:	_start
+#0 0x[\da-f]{16} ensures::magic\(int\) .+/test/fail-ensures.cpp:%:\d+
+#1 0x[\da-f]{16} magic2\(int\) .+/test/fail-ensures.cpp:49:\d+
+#2 0x[\da-f]{16} main .+/test/fail-ensures.cpp:55:\d+
+#3 0x[\da-f]{16} __libc_start_main \(.*\+0x[\da-f]+\)
+#4 0x[\da-f]{16} _start \(.*/test/fail-ensures-%\+0x[\da-f]+\)

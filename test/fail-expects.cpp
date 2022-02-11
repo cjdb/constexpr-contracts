@@ -1,4 +1,5 @@
 //
+//  Copyright Google LLC
 //  Copyright Christopher Di Bella
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +15,32 @@
 // limitations under the License.
 //
 #include <cjdb/contracts.hpp>
-#include <cstdio>
-#include <cstdlib>
+
+enum class test_kind { equal_to, not_equal_to, less, less_equal, greater_equal, greater };
 
 namespace expects {
 	void f(int argc)
 	{
-		CJDB_EXPECTS(argc != 1);
+		switch (TEST) {
+		case test_kind::equal_to:
+			CJDB_EXPECTS(argc == 0);
+			break;
+		case test_kind::not_equal_to:
+			CJDB_EXPECTS(argc != 1);
+			break;
+		case test_kind::less:
+			CJDB_EXPECTS(argc < 0);
+			break;
+		case test_kind::less_equal:
+			CJDB_EXPECTS(argc <= 0);
+			break;
+		case test_kind::greater_equal:
+			CJDB_EXPECTS(argc >= 4);
+			break;
+		case test_kind::greater:
+			CJDB_EXPECTS(argc > 4);
+			break;
+		}
 	}
 } // namespace expects
 
@@ -32,11 +52,5 @@ void g(int argc)
 int main(int argc, char**)
 {
 	g(argc);
-	if (argc == 1) {
-		(void)std::fprintf(stderr, "This should never be printed.\n");
-		std::exit(1);
-	}
-
-	constexpr auto return_code = 255;
-	return return_code;
+	return 1;
 }

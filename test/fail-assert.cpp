@@ -1,4 +1,5 @@
 //
+//  Copyright Google LLC
 //  Copyright Christopher Di Bella
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +16,35 @@
 //
 #include "cjdb/contracts.hpp"
 
+enum class test_kind { equal_to, not_equal_to, less, less_equal, greater_equal, greater };
+
 namespace assert {
-	void f(int const argc) noexcept
+	void f(int argc) noexcept
 	{
-		CJDB_ASSERT(argc > 1);
+		switch (TEST) {
+		case test_kind::equal_to:
+			CJDB_ASSERT(argc == 0);
+			break;
+		case test_kind::not_equal_to:
+			CJDB_ASSERT(argc != 1);
+			break;
+		case test_kind::less:
+			CJDB_ASSERT(argc < 0);
+			break;
+		case test_kind::less_equal:
+			CJDB_ASSERT(argc <= 0);
+			break;
+		case test_kind::greater_equal:
+			CJDB_ASSERT(argc >= 4);
+			break;
+		case test_kind::greater:
+			CJDB_ASSERT(argc > 4);
+			break;
+		}
 	}
 } // namespace assert
 
-void g(int const argc) noexcept
+void g(int argc) noexcept
 {
 	assert::f(argc);
 }
@@ -30,6 +52,5 @@ void g(int const argc) noexcept
 int main(int argc, char**)
 {
 	g(argc);
-	constexpr auto return_code = 255;
-	return argc == 1 ? 0 : return_code;
+	return 1;
 }

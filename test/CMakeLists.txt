@@ -34,11 +34,32 @@ function(test_quiet_contract target expected_output)
 endfunction()
 
 
-cxx_test(TARGET pass FILENAME pass.cpp LINK_TARGETS contracts)
-cxx_binary(TARGET fail-expects FILENAME fail-expects.cpp LINK_TARGETS contracts)
-cxx_binary(TARGET fail-assert FILENAME fail-assert.cpp LINK_TARGETS contracts)
-cxx_binary(TARGET fail-ensures FILENAME fail-ensures.cpp LINK_TARGETS contracts)
+cxx_test(TARGET pass FILENAME pass.cpp LINK_TARGETS contracts ${llvm_libs})
 
-test_quiet_contract("fail-expects" "${CMAKE_CURRENT_SOURCE_DIR}/expects")
-test_quiet_contract("fail-assert" "${CMAKE_CURRENT_SOURCE_DIR}/assert")
-test_quiet_contract("fail-ensures" "${CMAKE_CURRENT_SOURCE_DIR}/ensures")
+set(macros equal_to not_equal_to less less_equal greater_equal greater)
+
+foreach(i IN ITEMS ${macros})
+  cxx_binary(
+    TARGET fail-expects-${i}
+    FILENAME fail-expects.cpp
+    LINK_TARGETS contracts
+    DEFINITIONS TEST=test_kind::${i}
+  )
+  test_quiet_contract("fail-expects-${i}" "${CMAKE_CURRENT_SOURCE_DIR}/expects")
+
+  cxx_binary(
+    TARGET fail-assert-${i}
+    FILENAME fail-assert.cpp
+    LINK_TARGETS contracts
+    DEFINITIONS TEST=test_kind::${i}
+  )
+  test_quiet_contract("fail-assert-${i}" "${CMAKE_CURRENT_SOURCE_DIR}/assert")
+
+  cxx_binary(
+    TARGET fail-ensures-${i}
+    FILENAME fail-ensures.cpp
+    LINK_TARGETS contracts
+    DEFINITIONS TEST=test_kind::${i}
+  )
+  test_quiet_contract("fail-ensures-${i}" "${CMAKE_CURRENT_SOURCE_DIR}/ensures")
+endforeach()

@@ -1,3 +1,4 @@
+// Copyright (c) Google LLC
 // Copyright (c) Christopher Di Bella.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -8,6 +9,10 @@
 #include <cstdlib>
 #include <cxxabi.h>
 #include <execinfo.h>
+#include <llvm/ADT/SmallString.h>
+#include <llvm/ADT/StringRef.h>
+#include <llvm/Support/Signals.h>
+#include <llvm/Support/raw_ostream.h>
 #include <memory>
 #include <ranges>
 #include <span>
@@ -15,42 +20,19 @@
 #include <string_view>
 
 namespace cjdb::constexpr_contracts_detail {
-	// TODO(cjdb): remove once Clang supports std::ranges::find
-	template<class I, class S>
-	[[nodiscard]] I find(I first, S last, char const value)
-	{
-		for (; *first != last; ++first) {
-			if (*first == value) {
-				return first;
+	namespace {
+		[[nodiscard]] auto find_last(auto& r, auto const& value)
+		{
+			auto last = r.end();
+			for (auto i = r.begin(); i != r.end(); ++i) {
+				if (i->contains(value)) {
+					last = i;
+				}
 			}
+
+			return last;
 		}
-
-		return first;
-	}
-
-	template<class I, class S, class Pred>
-	[[nodiscard]] I find_if(I first, S last, Pred pred)
-	{
-		for (; *first != last; ++first) {
-			if (pred(*first)) {
-				return first;
-			}
-		}
-
-		return first;
-	}
-
-	template<class I, class S, class Pred>
-	I find_if_not(I first, S last, Pred pred)
-	{
-		for (; *first != last; ++first) {
-			if (not pred(*first)) {
-				return first;
-			}
-		}
-
-		return first;
-	}
+	} // namespace
 
 	void print_stacktrace() noexcept
 	{
@@ -58,54 +40,22 @@ namespace cjdb::constexpr_contracts_detail {
 		  stderr,
 		  "\n------------------------------------------ Stack trace ------------------------------------------\n");
 
-		auto stacktrace = std::array<void*, 64>{};
-		auto const stacktrace_size = backtrace(stacktrace.data(), stacktrace.size());
+		auto raw_message = std::string();
+		auto os = llvm::raw_string_ostream(raw_message);
+		llvm::sys::PrintStackTrace(os);
+		auto stacktrace = llvm::SmallVector<llvm::StringRef, 0>();
+		llvm::StringRef(raw_message).split(stacktrace, '\n');
 
-		if (stacktrace_size == 0) {
-			(void)fprintf(
-			  stderr,
-			  "<Unable to retrieve the stacktrace: you might have a corrupt stack, or debugging symbols "
-			  "might not be enabled.>\n");
-			return;
-		}
-
-		auto const symbol_data =
-		  std::unique_ptr<char*, void (*)(void*)>(backtrace_symbols(stacktrace.data(), stacktrace_size), ::free);
-		constexpr auto drop = 5;
-		auto const symbols = std::span(symbol_data.get() + drop, static_cast<std::size_t>(stacktrace_size - drop));
-
-		for (auto const symbol : symbols) {
-			auto first = symbol;
-			auto last = find(first, std::unreachable_sentinel, '(');
-			auto const binary_name = std::string(first, last);
-
-			first = last + 1;
-			last = find_if_not(first, std::unreachable_sentinel, [](char const c) {
-				return static_cast<bool>(std::isalnum(c)) or c == '_';
-			});
-			auto const mangled_symbol_name = std::string(first, last);
-
-			first = find_if(last + 1, std::unreachable_sentinel, ::isdigit);
-			last = find_if_not(first + 1, std::unreachable_sentinel, ::isalnum);
-			auto const offset = std::string(first, last);
-
-			std::size_t length = 0;
-			int status = 0;
-			auto const demangled_name = std::unique_ptr<char, void (*)(void*)>(
-			  abi::__cxa_demangle(std::string(mangled_symbol_name).data(), nullptr, &length, &status),
-			  ::free);
-
-			if (status == 0) {
-				(void)fprintf(stderr, "  %s:\t%s\n", binary_name.data(), demangled_name.get());
+		auto frame = 0;
+		for (auto i = find_last(stacktrace, "cjdb::constexpr_contracts_detail::contract_impl") + 1; i != stacktrace.end(); ++i)
+		{
+			if (i->empty()) {
 				continue;
 			}
 
-			if (not mangled_symbol_name.empty()) {
-				(void)fprintf(stderr, "  %s:\t%s\n", binary_name.data(), mangled_symbol_name.data());
-				continue;
-			}
-
-			(void)fprintf(stderr, "  %s:\t[%s]\n", binary_name.data(), offset.data());
+			auto const location = i->find("0x");
+			auto const current_trace = std::string(i->begin() + location, i->begin() + i->size());
+			(void)std::fprintf(stderr, "#%i %s\n", frame++, current_trace.data());
 		}
 	}
 

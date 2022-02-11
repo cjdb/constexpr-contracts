@@ -1,3 +1,4 @@
+// Copyright (c) Google LLC.
 // Copyright (c) Christopher Di Bella.
 // Copyright (c) Casey Carter.
 // Copyright (c) Eric Niebler.
@@ -8,6 +9,7 @@
 
 #include <string_view>
 #include <type_traits>
+
 namespace cjdb::constexpr_contracts_detail {
 	void print_stacktrace() noexcept;
 
@@ -108,14 +110,6 @@ namespace cjdb::constexpr_contracts_detail {
 				handle_violation(u);
 			}
 		}
-
-		constexpr void operator<=>(auto const& u) noexcept
-		{
-			dismissed_ = true;
-			if (not (value_ <=> u)) [[unlikely]] {
-				handle_violation(u);
-			}
-		}
 	private:
 		char const* function_;
 		char const* expected_;
@@ -131,16 +125,14 @@ namespace cjdb::constexpr_contracts_detail {
 
 #if _MSC_VER
 			__assume(0);
-#elif defined(__OPTIMIZE__)
-			__builtin_unreachable();
 #else
-			__builtin_trap();
+			__builtin_abort();
 #endif
 		}
 
 		constexpr auto eval() noexcept
 		{
-			if constexpr (requires { not value_; }) {
+			if constexpr (std::is_convertible_v<T, bool>) {
 				return not static_cast<bool>(value_);
 			}
 			else {
@@ -153,11 +145,9 @@ namespace cjdb::constexpr_contracts_detail {
 		  [[maybe_unused]] char const* const expected,
 		  [[maybe_unused]] T const& actual) noexcept
 		{
-#if not defined(NDEBUG) // or defined(CJDB_CONTRACTS_ALWAYS_REPORT)
 			print_contract_violation_header(contract_type(), function_name, expected);
 			print_contract_violation(actual);
 			print_stacktrace();
-#endif
 		}
 
 		static constexpr char const* contract_type() noexcept
@@ -189,20 +179,26 @@ namespace cjdb::constexpr_contracts_detail {
 	};
 } // namespace cjdb::constexpr_contracts_detail
 
-#define CJDB_ASSERT(...)                                                                                      \
-	(void)(cjdb::constexpr_contracts_detail::contract<cjdb::constexpr_contracts_detail::contract_kind::assume>( \
-	         __PRETTY_FUNCTION__,                                                                               \
-	         #__VA_ARGS__)                                                                                      \
-	         ->*__VA_ARGS__)
-#define CJDB_EXPECTS(...)                                                                                      \
-	(void)(cjdb::constexpr_contracts_detail::contract<cjdb::constexpr_contracts_detail::contract_kind::expects>( \
-	         __PRETTY_FUNCTION__,                                                                                \
-	         #__VA_ARGS__)                                                                                       \
-	         ->*__VA_ARGS__)
-#define CJDB_ENSURES(...)                                                                                      \
-	(void)(cjdb::constexpr_contracts_detail::contract<cjdb::constexpr_contracts_detail::contract_kind::ensures>( \
-	         __PRETTY_FUNCTION__,                                                                                \
-	         #__VA_ARGS__)                                                                                       \
-	         ->*__VA_ARGS__)
+#if defined(CJDB_CONTRACTS_DO_NOT_REPORT)
+#	define CJDB_ASSERT(...)  (void)(false)
+#	define CJDB_EXPECTS(...) (void)(false)
+#	define CJDB_ENSURES(...) (void)(false)
+#else
+#	define CJDB_ASSERT(...)                                                                                      \
+		(void)(cjdb::constexpr_contracts_detail::contract<cjdb::constexpr_contracts_detail::contract_kind::assume>( \
+		         __PRETTY_FUNCTION__,                                                                               \
+		         #__VA_ARGS__)                                                                                      \
+		         ->*__VA_ARGS__)
+#	define CJDB_EXPECTS(...)                                                                                      \
+		(void)(cjdb::constexpr_contracts_detail::contract<cjdb::constexpr_contracts_detail::contract_kind::expects>( \
+		         __PRETTY_FUNCTION__,                                                                                \
+		         #__VA_ARGS__)                                                                                       \
+		         ->*__VA_ARGS__)
+#	define CJDB_ENSURES(...)                                                                                      \
+		(void)(cjdb::constexpr_contracts_detail::contract<cjdb::constexpr_contracts_detail::contract_kind::ensures>( \
+		         __PRETTY_FUNCTION__,                                                                                \
+		         #__VA_ARGS__)                                                                                       \
+		         ->*__VA_ARGS__)
+#endif
 
 #endif // CJDB_CONTRACTS_HPP

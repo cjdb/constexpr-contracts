@@ -88,7 +88,6 @@
     "--completion-style=detailed",
     "--header-insertion=iwyu",
     "-j=4",
-    "--malloc-trim",
     "--pch-storage=memory",
     "--clang-tidy"
   ],

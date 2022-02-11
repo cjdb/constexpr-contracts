@@ -1,4 +1,5 @@
 //
+//  Copyright Google LLC
 //  Copyright Christopher Di Bella
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +15,32 @@
 // limitations under the License.
 //
 #include "cjdb/contracts.hpp"
-#include <cstdio>
-#include <cstdlib>
+
+enum class test_kind { equal_to, not_equal_to, less, less_equal, greater_equal, greater };
 
 namespace ensures {
-	int magic(int x) noexcept
+	int magic(int argc) noexcept
 	{
-		return CJDB_ENSURES(x > 1), x * 2;
+		switch (TEST) {
+		case test_kind::equal_to:
+			return CJDB_ENSURES(argc == 0), argc * 2;
+			break;
+		case test_kind::not_equal_to:
+			return CJDB_ENSURES(argc != 1), argc * 2;
+			break;
+		case test_kind::less:
+			return CJDB_ENSURES(argc < 0), argc * 2;
+			break;
+		case test_kind::less_equal:
+			return CJDB_ENSURES(argc <= 0), argc * 2;
+			break;
+		case test_kind::greater_equal:
+			return CJDB_ENSURES(argc >= 4), argc * 2;
+			break;
+		case test_kind::greater:
+			return CJDB_ENSURES(argc > 4), argc * 2;
+			break;
+		}
 	}
 } // namespace ensures
 
@@ -31,12 +51,6 @@ int magic2(int x) noexcept
 
 int main(int const argc, char**)
 {
-	auto const x = magic2(argc);
-	if (x == 2) {
-		(void)std::fprintf(stderr, "This should never be printed.\n");
-		std::exit(1);
-	}
-
-	constexpr auto return_code = 255;
-	return return_code;
+	(void)magic2(argc);
+	return 1;
 }

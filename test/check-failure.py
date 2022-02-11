@@ -31,6 +31,36 @@ def dump(name, data):
 		f.write(data)
 
 
+def substitute_matches(process_name, expected, actual):
+	placeholder = r'0x[\da-f]{16}'
+	for i in re.findall(placeholder, actual):
+		expected = expected.replace(placeholder, i, 1)
+
+	placeholder = r'\+0x[\da-f]+'
+	for i in re.findall(placeholder, actual):
+		expected = expected.replace(placeholder, i, 1)
+
+	process_name = re.search('.*(fail-(expects|assert|ensures)).*',
+							 process_name).group(1)
+	for i in re.findall(f'[n)] .+/test/{process_name}.cpp', actual):
+		expected = expected.replace(f'.+/test/{process_name}.cpp', i[2:], 1)
+
+	for i in re.findall(r'\(.*\+', actual):
+		expected = expected.replace('(.*+', i, 1)
+
+	for i in re.findall(f'_start \\(.+/test/{process_name}', actual):
+		expected = expected.replace(f'_start (.+/test/{process_name}', i, 1)
+
+	actual_columns = re.finditer(r'(.cpp:\d+:)(\d+)', actual)
+	expected_columns = re.finditer(r'(.cpp:\d+:)(.+\+)', expected)
+
+	for (ai, ei) in zip(actual_columns, expected_columns):
+		expected = expected.replace(f'{ei.group(1)}{ei.group(2)}',
+									f'{ei.group(1)}{ai.group(2)}')
+
+	return expected
+
+
 def check_program(args):
 	process = f"./test/{args.process_name}"
 	process_results = subprocess.run(process, capture_output=True, timeout=5)
@@ -55,11 +85,31 @@ def check_program(args):
 		actual_output = process_results.stderr.decode()
 		with open(args.expected_output, 'r') as f:
 			expected_output = f.read()
-			if re.match(expected_output, actual_output):
-				dump(f'expected.{os.getpid()}', expected_output)
-				dump(f'actual.{os.getpid()}', actual_output)
-				subprocess.run(['diff', f'/tmp/expected.{os.getpid()}', f'/tmp/actual.{os.getpid()}'])
-				abort(process, f'\n\nexpected output does not match actual output')
+
+		macros = {
+			'equal_to': ['==', '0', '26'],
+			'not_equal_to': ['!=', '1', '29'],
+			'less': ['<', '0', '32'],
+			'less_equal': ['<=', '0', '35'],
+			'greater_equal': ['>=', '4', '38'],
+			'greater': ['>', '4', '41']
+		}
+
+		index = re.sub('fail-(expects|assert|ensures)-', '', args.process_name)
+		expected_output = expected_output.replace('%', macros[index][0], 1)
+		expected_output = expected_output.replace('%', macros[index][1], 1)
+		expected_output = expected_output.replace('%', macros[index][2], 1)
+		expected_output = expected_output.replace('%', index, 1)
+
+		if not re.match(expected_output, actual_output):
+			expected_output = expected_output.replace('\(', '(')
+			expected_output = expected_output.replace('\)', ')')
+			expected_output = substitute_matches(
+				args.process_name, expected_output, actual_output)
+			dump(f'expected.{os.getpid()}', expected_output)
+			dump(f'actual.{os.getpid()}', actual_output)
+			subprocess.run(['diff', f'/tmp/expected.{os.getpid()}', f'/tmp/actual.{os.getpid()}'])
+			abort(process, f'\n\nexpected output does not match actual output')
 
 
 def parse_args():
@@ -75,4 +125,5 @@ def main():
 	check_program(args)
 
 
-main()
+if __name__ == "__main__":
+	main()
