@@ -73,12 +73,17 @@ jobs:
 
       - name: Test
         id: test
-        run: ctest -j$(nproc) --output-on-failure --test-dir build
+        run: |
+          ctest -j$(nproc) --output-on-failure --test-dir build
+          test/validate_contract_violation.py                       \
+            --expected-output=test/print_contract_violation         \
+            --process-name=build/test/test_print_contract_violation
 
       - name: Install
         id: install
         run: |
           ninja -C build install
           ls /tmp/coco/include/cjdb/contracts.hpp
+          ls /tmp/coco/include/cjdb/detail/print_contract_violation.hpp
           ls /tmp/coco/lib/libcontracts.a
           ls /tmp/coco/lib/cmake/constexpr-contracts/constexpr-contracts-config.cmake

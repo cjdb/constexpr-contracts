@@ -44,6 +44,7 @@ string(
    -Wno-attributes
    -Wnull-dereference
    -Wno-unused-command-line-argument
+   -fno-rtti
 )
 
 string(

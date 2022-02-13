@@ -33,8 +33,13 @@ function(test_quiet_contract target expected_output)
 	endif()
 endfunction()
 
+cxx_binary(
+  TARGET test_print_contract_violation
+  FILENAME test_print_contract_violation.cpp
+  LINK_TARGETS contracts
+)
 
-cxx_test(TARGET pass FILENAME pass.cpp LINK_TARGETS contracts ${llvm_libs})
+cxx_test(TARGET pass FILENAME pass.cpp LINK_TARGETS contracts)
 
 set(macros equal_to not_equal_to less less_equal greater_equal greater)
 

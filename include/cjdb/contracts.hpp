@@ -7,37 +7,13 @@
 #ifndef CJDB_CONTRACTS_HPP
 #define CJDB_CONTRACTS_HPP
 
-#include <string_view>
+#include "detail/print_contract_violation.hpp"
 #include <type_traits>
+#include <utility>
 
 namespace cjdb::constexpr_contracts_detail {
 	void print_stacktrace() noexcept;
 
-	void print_contract_violation(signed char value) noexcept;
-	void print_contract_violation(unsigned char value) noexcept;
-	void print_contract_violation(short value) noexcept;
-	void print_contract_violation(unsigned short value) noexcept;
-	void print_contract_violation(int value) noexcept;
-	void print_contract_violation(unsigned int value) noexcept;
-	void print_contract_violation(long value) noexcept;
-	void print_contract_violation(unsigned long value) noexcept;
-	void print_contract_violation(long long value) noexcept;
-	void print_contract_violation(unsigned long long value) noexcept;
-	void print_contract_violation(float value) noexcept;
-	void print_contract_violation(double value) noexcept;
-	void print_contract_violation(long double value) noexcept;
-	void print_contract_violation(bool value) noexcept;
-	void print_contract_violation(char value) noexcept;
-	void print_contract_violation(char const* value) noexcept;
-	void print_contract_violation(wchar_t value) noexcept;
-	void print_contract_violation(wchar_t const* value) noexcept;
-	void print_contract_violation(char8_t value) noexcept;
-	void print_contract_violation(char16_t value) noexcept;
-	void print_contract_violation(char32_t value) noexcept;
-	void print_contract_violation(void const* value) noexcept;
-	void print_contract_violation(std::string_view value) noexcept;
-	void print_contract_violation() noexcept;
-	void print_contract_violation_hex(unsigned char value) noexcept;
 	void
 	print_contract_violation_header(char const* contract_type, char const* function_name, char const* expected) noexcept;
 
@@ -117,7 +93,7 @@ namespace cjdb::constexpr_contracts_detail {
 		bool dismissed_ = false;
 
 		template<class U>
-		[[noreturn]] constexpr void handle_violation(U const&) const noexcept
+		[[noreturn]] constexpr void handle_violation(U const&) noexcept
 		{
 			if (not std::is_constant_evaluated()) {
 				report_failure(function_, expected_, value_);
@@ -140,13 +116,12 @@ namespace cjdb::constexpr_contracts_detail {
 			}
 		}
 
-		static void report_failure(
-		  [[maybe_unused]] char const* const function_name,
-		  [[maybe_unused]] char const* const expected,
-		  [[maybe_unused]] T const& actual) noexcept
+		static void report_failure(char const* const function_name, char const* const expected, T& actual) noexcept
 		{
 			print_contract_violation_header(contract_type(), function_name, expected);
+			(void)fputs("'", stderr);
 			print_contract_violation(actual);
+			(void)fputs("'", stderr);
 			print_stacktrace();
 		}
 

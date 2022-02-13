@@ -30,7 +30,6 @@ string(
    -rtlib=compiler-rt
    -stdlib=libc++
    -static-libgcc
-   -fno-rtti
 )
 
 set(

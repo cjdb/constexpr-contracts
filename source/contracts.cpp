@@ -38,7 +38,7 @@ namespace cjdb::constexpr_contracts_detail {
 	{
 		(void)fprintf(
 		  stderr,
-		  "\n------------------------------------------ Stack trace ------------------------------------------\n");
+		  "\n\n------------------------------------------ Stack trace ------------------------------------------\n");
 
 		auto raw_message = std::string();
 		auto os = llvm::raw_string_ostream(raw_message);
@@ -61,127 +61,154 @@ namespace cjdb::constexpr_contracts_detail {
 
 	void print_contract_violation(signed char const value) noexcept
 	{
-		(void)fprintf(stderr, "'%hhd'\n", value);
+		(void)fprintf(stderr, "%hhd", value);
 	}
 
 	void print_contract_violation(unsigned char const value) noexcept
 	{
-		(void)fprintf(stderr, "'%hhu'\n", value);
+		(void)fprintf(stderr, "%hhu", value);
 	}
 
 	void print_contract_violation(short const value) noexcept
 	{
-		(void)fprintf(stderr, "'%hd'\n", value);
+		(void)fprintf(stderr, "%hd", value);
 	}
 
 	void print_contract_violation(unsigned short const value) noexcept
 	{
-		(void)fprintf(stderr, "'%hu'\n", value);
+		(void)fprintf(stderr, "%hu", value);
 	}
 
 	void print_contract_violation(int const value) noexcept
 	{
-		(void)fprintf(stderr, "'%d'\n", value);
+		(void)fprintf(stderr, "%d", value);
 	}
 
 	void print_contract_violation(unsigned int const value) noexcept
 	{
-		(void)fprintf(stderr, "'%u'\n", value);
+		(void)fprintf(stderr, "%u", value);
 	}
 
 	void print_contract_violation(long const value) noexcept
 	{
-		(void)fprintf(stderr, "'%ld'\n", value);
+		(void)fprintf(stderr, "%ld", value);
 	}
 
 	void print_contract_violation(unsigned long const value) noexcept
 	{
-		(void)fprintf(stderr, "'%lu'\n", value);
+		(void)fprintf(stderr, "%lu", value);
 	}
 
 	void print_contract_violation(long long const value) noexcept
 	{
-		(void)fprintf(stderr, "'%lld'\n", value);
+		(void)fprintf(stderr, "%lld", value);
 	}
 
 	void print_contract_violation(unsigned long long const value) noexcept
 	{
-		(void)fprintf(stderr, "'%llu'\n", value);
+		(void)fprintf(stderr, "%llu", value);
 	}
 
 	void print_contract_violation(float const value) noexcept
 	{
-		(void)fprintf(stderr, "'%f'\n", static_cast<double>(value));
+		(void)fprintf(stderr, "%a", static_cast<double>(value));
 	}
 
 	void print_contract_violation(double const value) noexcept
 	{
-		(void)fprintf(stderr, "'%f'\n", value);
+		(void)fprintf(stderr, "%a", value);
 	}
 
 	void print_contract_violation(long double const value) noexcept
 	{
-		(void)fprintf(stderr, "'%Lf'\n", value);
+		(void)fprintf(stderr, "%La", value);
 	}
 
 	void print_contract_violation(bool const value) noexcept
 	{
-		(void)fprintf(stderr, "'%s'\n", value ? "true" : "false");
+		(void)fprintf(stderr, "%s", value ? "true" : "false");
 	}
 
 	void print_contract_violation(char const value) noexcept
 	{
-		(void)fprintf(stderr, "'%c'\n", value);
-	}
-
-	void print_contract_violation(char const* const value) noexcept
-	{
-		(void)fprintf(stderr, "'%s'\n", value);
+		(void)fprintf(stderr, "%c", value);
 	}
 
 	void print_contract_violation(wchar_t const value) noexcept
 	{
-		(void)fprintf(stderr, "'%lc'\n", value);
-	}
-
-	void print_contract_violation(wchar_t const* const value) noexcept
-	{
-		(void)fprintf(stderr, "'%ls'\n", value);
+		(void)fprintf(stderr, "%lc", value);
 	}
 
 	void print_contract_violation(char8_t const value) noexcept
 	{
-		(void)fprintf(stderr, "'%c'\n", static_cast<char>(value));
+		(void)fprintf(stderr, "%c", static_cast<char>(value));
 	}
 
 	void print_contract_violation(char16_t const value) noexcept
 	{
-		(void)fprintf(stderr, "'%lc'\n", value);
+		(void)fprintf(stderr, "%lc", value);
 	}
 
 	void print_contract_violation(char32_t const value) noexcept
 	{
-		(void)fprintf(stderr, "'%c'\n", value);
+		(void)fprintf(stderr, "%c", value);
 	}
 
-	void print_contract_violation(void const* const value) noexcept
+	void print_contract_violation(std::byte const value) noexcept
 	{
-		(void)fprintf(stderr, "'%p'\n", value);
+		(void)fprintf(stderr, "0x%02x", static_cast<unsigned char>(value));
 	}
 
-	void print_contract_violation(std::string_view const value) noexcept
+	void print_contract_violation(std::nullptr_t) noexcept
 	{
-		(void)print_contract_violation(value.data());
+		(void)fputs("nullptr", stderr);
+	}
+	void print_contract_violation(std::nullopt_t) noexcept
+	{
+		(void)fputs("std::nullopt", stderr);
 	}
 
-	void print_contract_violation() noexcept
+	void print_contract_violation(std::partial_ordering const value) noexcept
 	{
-		(void)fprintf(stderr, "<non-printable-type>");
+		if (value == std::partial_ordering::less) {
+			return (void)fputs("std::partial_ordering::less", stderr);
+		}
+
+		if (value == std::partial_ordering::equivalent) {
+			return (void)fputs("std::partial_ordering::equivalent", stderr);
+		}
+
+		if (value == std::partial_ordering::greater) {
+			return (void)fputs("std::partial_ordering::greater", stderr);
+		}
+
+		return (void)fputs("std::partial_ordering::unordered", stderr);
 	}
 
-	void print_contract_violation_hex(unsigned char const value) noexcept
+	void print_contract_violation(std::weak_ordering const value) noexcept
 	{
-		(void)fprintf(stderr, "'%#x'", value);
+		if (value == std::weak_ordering::less) {
+			return (void)fputs("std::weak_ordering::less", stderr);
+		}
+
+		if (value == std::weak_ordering::equivalent) {
+			return (void)fputs("std::weak_ordering::equivalent", stderr);
+		}
+
+		return (void)fputs("std::weak_ordering::greater", stderr);
+	}
+
+	void print_contract_violation(std::strong_ordering const value) noexcept
+	{
+		if (value == std::strong_ordering::less) {
+			return (void)fputs("std::strong_ordering::less", stderr);
+		}
+
+		if (value == std::strong_ordering::equal) {
+			return (void)fputs("std::strong_ordering::equal", stderr);
+		}
+
+		return (void)fputs("std::strong_ordering::greater", stderr);
 	}
 
 	void print_contract_violation_header(
