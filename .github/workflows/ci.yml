@@ -4,46 +4,44 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: ${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.toolchain }}
+    name: ${{ matrix.os }}-${{ matrix.build_type }}-${{ matrix.toolchain.file }}
     runs-on: ${{ matrix.os }}
+    env:
+      LD_LIBRARY_PATH: /usr/local/lib/x86_64-unknown-linux-gnu:/usr/local/lib
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04]
         build_type: [Debug, Release]
-        toolchain: [gcc_libstdcxx, clang_libcxx]
-        enable_clang_tidy: [Off]
-        clang_tidy_path: [/usr/bin/clang-tidy]
+        toolchain:
+          - compiler: GCC
+            stdlib: libstdcxx
+            file: gcc_libstdcxx
+            enable_clang_tidy: Off
+          - compiler: Clang
+            stdlib: libcxx
+            file: clang_libcxx
+            enable_clang_tidy: Off
+        clang_tidy_path: [/usr/local/bin/clang-tidy]
     steps:
       - name: Install tools
         id: install_tools
         run: |
-          sudo wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
-          sudo apt-add-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal main'
           sudo apt-get update
-          sudo apt-get remove -y .*clang.* .*llvm.*
-          sudo apt-get autoremove -y
-          sudo apt-get install -y  \
-            clang                  \
-            clang-format           \
-            clang-tidy             \
-            clang-tools            \
-            cmake                  \
-            g++-11                 \
-            gcc-11                 \
-            libc++-14-dev          \
-            libc++abi-14-dev       \
-            libclang-14-dev        \
-            libclang-common-14-dev \
-            libfuzzer-14-dev       \
-            libunwind-14-dev       \
-            lld                    \
-            llvm-dev               \
-            ninja-build            \
-            python3-clang
+          sudo apt-get install -y cmake g++-11  gcc-11 ninja-build wget
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 100
-          clang --version
+
+      - name: Download and install LLVM
+        id: download_llvm
+        run: |
+          wget https://github.com/cjdb/llvm-with-libcxx-nightly/releases/download/nightly/llvm-${{ matrix.toolchain.stdlib }}-x86_64-unknown-linux-gnu.tar.xz
+          tar -xvf llvm-${{ matrix.toolchain.stdlib }}-x86_64-unknown-linux-gnu.tar.xz
+          rm -f llvm-${{ matrix.toolchain.stdlib }}-x86_64-unknown-linux-gnu.tar.xz
+          sudo  cp -r llvm-${{ matrix.toolchain.stdlib }}-x86_64-unknown-linux-gnu/* /usr/local/.
+          rm -rf llvm-${{ matrix.toolchain.stdlib }}-x86_64-unknown-linux-gnu
+          sudo find /usr/local -name '*unwind*'
+
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -53,7 +51,7 @@ jobs:
       - name: Formatting
         id: git_clang_format
         run: git-clang-format
-          --style=file
+          --style file
           --extensions c,cc,cpp,cxx,h,hh,hpp,hxx
           --diff origin/main HEAD
 
@@ -63,8 +61,8 @@ jobs:
           cmake -G Ninja -S . -B build
             -DCMAKE_INSTALL_PREFIX=/tmp/coco
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-            -DCMAKE_TOOLCHAIN_FILE=`pwd`/config/cmake/toolchains/${{ matrix.toolchain }}.cmake
-            -DCONSTEXPR_CONTRACTS_ENABLE_CLANG_TIDY=${{ matrix.enable_clang_tidy }}
+            -DCMAKE_TOOLCHAIN_FILE=`pwd`/config/cmake/toolchains/${{ matrix.toolchain.file }}.cmake
+            -DCONSTEXPR_CONTRACTS_ENABLE_CLANG_TIDY=${{ matrix.toolchain.enable_clang_tidy }}
             -DCONSTEXPR_CONTRACTS_CLANG_TIDY_PATH=${{ matrix.clang_tidy_path }}
 
       - name: Build

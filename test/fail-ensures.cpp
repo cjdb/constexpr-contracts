@@ -19,7 +19,7 @@
 enum class test_kind { equal_to, not_equal_to, less, less_equal, greater_equal, greater };
 
 namespace ensures {
-	int magic(int argc) noexcept
+	int magic([[maybe_unused]] int argc) noexcept
 	{
 		switch (TEST) {
 		case test_kind::equal_to:
@@ -52,5 +52,7 @@ int magic2(int x) noexcept
 int main(int const argc, char**)
 {
 	(void)magic2(argc);
-	return 1;
+#if not defined(CJDB_CONTRACTS_DISABLED)
+	return 255;
+#endif
 }

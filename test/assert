@@ -3,7 +3,7 @@ An assumption of 'void assert::f\(int\)' is that 'argc % %', but we provided '1'
 
 ------------------------------------------ Stack trace ------------------------------------------
 #0 0x[\da-f]{16} assert::f\(int\) .+/test/fail-assert.cpp:%:\d+
-#1 0x[\da-f]{16} g\(int\) .+/test/fail-assert.cpp:50:\d+
-#2 0x[\da-f]{16} main .+/test/fail-assert.cpp:55:\d+
+#1 0x[\da-f]{16} g\(int\) .+/test/fail-assert.cpp:(49|50):\d+
+#2 0x[\da-f]{16} main .+/test/fail-assert.cpp:56:\d+
 #3 0x[\da-f]{16} __libc_start_main \(.*\+0x[\da-f]+\)
 #4 0x[\da-f]{16} _start \(.+/test/fail-assert-%\+0x[\da-f]+\)

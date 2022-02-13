@@ -19,7 +19,7 @@
 enum class test_kind { equal_to, not_equal_to, less, less_equal, greater_equal, greater };
 
 namespace expects {
-	void f(int argc)
+	void f([[maybe_unused]] int argc)
 	{
 		switch (TEST) {
 		case test_kind::equal_to:
@@ -52,5 +52,7 @@ void g(int argc)
 int main(int argc, char**)
 {
 	g(argc);
-	return 1;
+#if not defined(CJDB_CONTRACTS_DISABLED)
+	return 255;
+#endif
 }

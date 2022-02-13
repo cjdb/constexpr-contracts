@@ -65,63 +65,61 @@ def check_program(args):
     process = f"./test/{args.process_name}"
     process_results = subprocess.run(process, capture_output=True, timeout=5)
 
-    if process_results.returncode == 0:
-        abort(process, "has unexpectedly succeeded.")
-
     if process_results.stdout:
         abort(process, "should not be writing to stdout.")
 
-    if process_results.stderr and not args.debug:
-        abort(
-            process,
-            f"wrote to stderr when building in a release mode:\n\n{process_results.stderr.decode()}\n"
-        )
-
-    expected_result = 255
-    if not args.debug and process_results.returncode != expected_result:
-        abort(
-            process,
-            f"returned {process_results.returncode} when it should have returned {expected_result}"
-        )
-
-    if args.debug:
-        if not process_results.stderr:
+    if not args.debug:
+        if process_results.stderr:
             abort(
                 process,
-                "did not write to stderr while debugging symbols are present.")
+                f"wrote to stderr when building in a release mode:\n\n{process_results.stderr.decode()}\n"
+            )
 
-        actual_output = process_results.stderr.decode()
-        with open(args.expected_output, 'r') as f:
-            expected_output = f.read()
+        expected_result = 0
+        if process_results.returncode != expected_result:
+            abort(
+                process,
+                f"returned {process_results.returncode} when it should have returned {expected_result}"
+            )
+        return
 
-        macros = {
-            'equal_to': ['==', '0', '26'],
-            'not_equal_to': ['!=', '1', '29'],
-            'less': ['<', '0', '32'],
-            'less_equal': ['<=', '0', '35'],
-            'greater_equal': ['>=', '4', '38'],
-            'greater': ['>', '4', '41']
-        }
+    if process_results.returncode == 0:
+        abort(process, "has unexpectedly succeeded.")
+    if not process_results.stderr:
+        abort(process,
+              "did not write to stderr while debugging symbols are present.")
 
-        index = re.sub('fail-(expects|assert|ensures)-', '', args.process_name)
-        expected_output = expected_output.replace('%', macros[index][0], 1)
-        expected_output = expected_output.replace('%', macros[index][1], 1)
-        expected_output = expected_output.replace('%', macros[index][2], 1)
-        expected_output = expected_output.replace('%', index, 1)
+    actual_output = process_results.stderr.decode()
+    with open(args.expected_output, 'r') as f:
+        expected_output = f.read()
 
-        if not re.match(expected_output, actual_output):
-            expected_output = expected_output.replace('\(', '(')
-            expected_output = expected_output.replace('\)', ')')
-            expected_output = substitute_matches(args.process_name,
-                                                 expected_output,
-                                                 actual_output)
-            dump(f'expected.{os.getpid()}', expected_output)
-            dump(f'actual.{os.getpid()}', actual_output)
-            subprocess.run([
-                'diff', f'/tmp/expected.{os.getpid()}',
-                f'/tmp/actual.{os.getpid()}'
-            ])
-            abort(process, f'\n\nexpected output does not match actual output')
+    macros = {
+        'equal_to': ['==', '0', '26'],
+        'not_equal_to': ['!=', '1', '29'],
+        'less': ['<', '0', '32'],
+        'less_equal': ['<=', '0', '35'],
+        'greater_equal': ['>=', '4', '38'],
+        'greater': ['>', '4', '41']
+    }
+
+    index = re.sub('fail-(expects|assert|ensures)-', '', args.process_name)
+    expected_output = expected_output.replace('%', macros[index][0], 1)
+    expected_output = expected_output.replace('%', macros[index][1], 1)
+    expected_output = expected_output.replace('%', macros[index][2], 1)
+    expected_output = expected_output.replace('%', index, 1)
+
+    if not re.match(expected_output, actual_output):
+        expected_output = expected_output.replace('\(', '(')
+        expected_output = expected_output.replace('\)', ')')
+        expected_output = substitute_matches(args.process_name,
+                                             expected_output, actual_output)
+        dump(f'expected.{os.getpid()}', expected_output)
+        dump(f'actual.{os.getpid()}', actual_output)
+        subprocess.run([
+            'diff', f'/tmp/expected.{os.getpid()}',
+            f'/tmp/actual.{os.getpid()}'
+        ])
+        abort(process, f'\n\nexpected output does not match actual output')
 
 
 def parse_args():
