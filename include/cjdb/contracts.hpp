@@ -154,7 +154,7 @@ namespace cjdb::constexpr_contracts_detail {
 	};
 } // namespace cjdb::constexpr_contracts_detail
 
-#if defined(CJDB_CONTRACTS_DO_NOT_REPORT)
+#if defined(CJDB_CONTRACTS_DISABLED)
 #	define CJDB_ASSERT(...)  (void)(false)
 #	define CJDB_EXPECTS(...) (void)(false)
 #	define CJDB_ENSURES(...) (void)(false)
