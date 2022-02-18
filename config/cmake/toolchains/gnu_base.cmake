@@ -45,6 +45,7 @@ string(
    -Wnull-dereference
    -Wno-unused-command-line-argument
    -fno-rtti
+   -fvisibility=hidden
 )
 
 string(
@@ -57,6 +58,5 @@ string(
 string(
    JOIN " " CONSTEXPR_CONTRACTS_FLAGS_RELEASE
    "${CONSTEXPR_CONTRACTS_FLAGS_RELEASE}"
-   -fvisibility=hidden
    -DCJDB_CONTRACTS_DISABLED
 )

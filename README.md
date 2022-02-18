@@ -10,9 +10,30 @@ offer a consolation library, which emulates how I'd like contracts to behave.
 ## Prerequisites
 
 1. CMake 3.17 or later
-2. GCC with libstdc++ or Clang 14 with libc++
+2. GCC 11 with libstdc++ or Clang 15 with libc++
+3. libLLVM 15
 
 ## Installation
+
+### Choosing your toolchain
+
+constexpr-contracts is a bit delicate in which toolchains it supports. If you're using libstdc++ and
+don't care for RTTI, then you're in the rare situation where you can install the dependencies, plug
+the library in, disable RTTI (if you haven't already), and start using constexpr-contracts.
+
+If you're not in this situation, then your situation is slightly more sticky. Official builds of
+LLVM might not be linked against the right standard library ABI for your needs, and it mightn't be
+built using RTTI (the [official nightly LLVM releases][apt] are linked against libstdc++'s ABI and
+don't have RTTI support).
+
+To work around this problem, [cjdb/llvm-nightly] was created, so that you can have a toolchain that
+is compatible with the library. Although llvm-nightly comes with almost the entire LLVM toolchain,
+we're only concerned with linking against the right `libLLVM`, so you don't need to transition your
+whole toolchain (although this is recommended so that your program can be built with the same
+toolchain from top to bottom).
+
+To hook in the right `libLLVM`, we need to provide CMake with
+`-DCMAKE_LLVM_ROOT=/path/to/llvm-toolchain/lib/cmake/llvm/LLVMConfig.cmake`.
 
 ### With vcpkg
 
@@ -22,10 +43,6 @@ Simply add `constexpr-contracts` to your vcpkg manifest file.
 
 To link using CMake, you'll need to use `find_package(constexpr-contracts REQUIRED)` to import the
 library. To link against the library, use `target_link_libraries(target PRIVATE cjdb::constexpr-contracts)`.
-
-To maximise user-experience, you should ensure that your `CMAKE_CXX_FLAGS` doesn't set symbol
-visibility to anything other than the default (you should instead defer this to
-`CMAKE_CXX_RELEASE_FLAGS`). `CMAKE_EXE_LINKER_FLAGS` should set `-rdynamic`.
 
 ## Usage
 
@@ -218,17 +235,6 @@ A precondition of 'person::person(std::string_view, std::string_view, int)' is t
 Aborted
 ```
 
-#### Why do `[0x3209a3]` and `[0x320a68]` appear?
-
-Those are the symbol names in memory, and represent a context that the run-time can't retrieve. The
-two known reasons why this can happen are:
-
-1. You're checking something in a global declaration.
-2. You've built with something like `-fvisibility=hidden` or you're not building with `-Wl,-rdynamic`.
-
-Support will eventually appear for reading debugging symbols, which will allow you to pinpoint the
-path and line numbers for each symbol.
-
 ### Post-conditions
 
 Finally, post-conditions allow us to provide a guarantee that our invariants hold upon exiting a
@@ -270,3 +276,20 @@ because it would prevent putting these checks in the very things we use to imple
 Once the standard library design has been completed, the library will probably be forked, and we'll
 move to using `<format>` for the user-facing library so that printing non-standard types becomes
 possible.
+
+
+### Why do I get linker errors for undefined symbols such as `typeinfo for llvm::raw_ostream` or `std::__once_callable`?
+
+It seems like you haven't properly installed the library's dependencies. Please see [Choosing your
+toolchain][install].
+
+## Acknowledgements
+
+Thanks to the following people for reviewing!
+
+* @edhebi
+* Ben Craig
+
+[apt]: https://apt.llvm.org/
+[cjdb/llvm-nightly]: https://github.com/cjdb/llvm-nightly/releases/tag/nightly
+[install]: #choosing-your-toolchain
