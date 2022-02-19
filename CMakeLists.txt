@@ -34,7 +34,6 @@ endif()
 include(add_targets)
 include(packages)
 
-include_directories(include)
 add_subdirectory(source)
 add_subdirectory(test)
 

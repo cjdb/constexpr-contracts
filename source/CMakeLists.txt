@@ -5,6 +5,6 @@ cxx_library(
   TARGET contracts
   FILENAME "contracts.cpp"
   LIBRARY_TYPE STATIC
-  INCLUDE_AND_EXPORT ${LLVM_INCLUDE_DIRS}
+  INCLUDE ${LLVM_INCLUDE_DIRS}
   LINK_AND_EXPORT ${llvm_libs}
 )

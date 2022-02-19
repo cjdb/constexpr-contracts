@@ -90,11 +90,13 @@ function(cxx_library)
       $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${add_target_args_INCLUDE_AND_EXPORT}>)
 
 	target_compile_definitions("${add_target_args_TARGET}" PRIVATE "${add_target_args_DEFINITIONS}")
-	target_include_directories("${add_target_args_TARGET}" PRIVATE "${add_target_args_INCLUDE}")
+	target_include_directories("${add_target_args_TARGET}" SYSTEM PRIVATE "${add_target_args_INCLUDE}")
 	target_compile_options("${add_target_args_TARGET}" PRIVATE "${add_target_args_COMPILE_OPTIONS}")
 	target_link_options("${add_target_args_TARGET}" PRIVATE "${add_target_args_LINK_OPTIONS}")
 	target_link_libraries("${add_target_args_TARGET}" PRIVATE "${add_target_args_LINK_TARGETS}")
-	target_link_libraries("${add_target_args_TARGET}" PUBLIC "${add_target_args_LINK_AND_EXPORT}")
+	target_link_libraries("${add_target_args_TARGET}" PUBLIC
+	  "$<BUILD_INTERFACE:${add_target_args_LINK_AND_EXPORT}>"
+	  "$<INSTALL_INTERFACE:${add_target_args_LINK_AND_EXPORT}>")
 endfunction()
 
 function(cxx_test)
